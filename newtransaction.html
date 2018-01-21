@@ -1,9 +1,10 @@
 <!doctype html>
 <html class="no-js" lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CHEDDR | Input</title>
+  <title>CHEDDR</title>
   <link rel="stylesheet" href="css/foundation.css" />
   <link rel="stylesheet" href="css/motion-ui.css" />
   <link rel="stylesheet" href="css/style.css" />
@@ -17,323 +18,364 @@
   <script src="js/foundation.min.js"></script>
   <script src="js/script.js"></script>
 
-<script type="text/javascript">
-function thousands(nStr) {
-  nStr += '';
-  var x = nStr.split('.');
-  var x1 = x[0];
-  var x2 = x.length > 1 ? '.' + x[1] : '';
-  var rgx = /(\d+)(\d{3})/;
-  while (rgx.test(x1)) {
-      x1 = x1.replace(rgx, '$1' + ',' + '$2');
-  }
-  return x1 + x2;
-}
-
-var paymentAddress = "bitcoincash:qp7zfgk6qfk0dkcf4rd40p7ergrw7fr72v6ed98y4f";
-
-var fiat = "AUD";
-var currentExchangeRate = 0;
-var transFeeBCH = 0.00000721;
-
-var subTotal = 0;
-var finalTotal = 0;
-
-var transFee = 0.016;
-var transFeeBits = 7.21;
-
-var subTotalBCH = 0;
-var finalTotalBCH = 0;
-
-$(document).ready(function() {
-  $('#paymentSummary').hide();
-  $('#displayFiat').text(fiat);
-
-  $.get("https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/?convert=" + fiat, function(data, status) {
-    var dateVar = "2010-10-30";
-    var exchangeUpdated = new Date(dateVar);
-    currentExchangeRate = data[0].price_aud;
-    console.log(currentExchangeRate);
-    console.log(exchangeUpdated);
-  }); 
-
-  transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(4);
-  $('#transactionFeeBits').text(transFeeBits);
-  $('#transactionFeeFiat').text(transFee);
-
-  var result = 0;
-  var prevEntry = 0;
-  var operation = null;
-  var currentEntry = '0';
-  updateScreen(result);
-
-  $("#clearInput").click(function () {
-    updateScreen(0);
-  });
-
-  $("#deleteItem").click(function () {
-
-  });
-
-  $("#addToOrder").click(function () {
-    var itemPrice = parseFloat($('#display').val()).toFixed(2);
-    var itemPriceBCH = 0;
-
-    if (itemPrice > 0) {
-      subTotal = parseFloat(subTotal) + parseFloat(itemPrice);
-      finalTotal = parseFloat(subTotal) + parseFloat(transFee)
-
-      itemPriceBCH = (parseFloat(itemPrice) / parseFloat(currentExchangeRate)).toFixed(10);
-      subTotalBCH = parseFloat(subTotalBCH) + parseFloat(itemPriceBCH);
-      finalTotalBCH = parseFloat(subTotalBCH) + parseFloat(transFeeBCH);
-
-      itemPriceBits = parseFloat(itemPriceBCH * 1000000).toFixed(2);
-      subTotalBits = parseFloat(subTotalBCH * 1000000).toFixed(2);
-      finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
-
-      $("#orderedItems").append('<div class="medium-5 large-5 column"><section><a class="deleteItem"><i class="fi-x"></i></a></section></div><div class="medium-3 large-3 column"><section><p>$' + itemPrice + '</p></section></div><div class="medium-4 large-4 column"><section><p>' + thousands(itemPriceBits) + '</p></section></div><hr width=0>');
-      $('#orderedItems').scrollTop($('#orderedItems')[0].scrollHeight);
-      
-      updateTotals();
-    }
-  });
-
-  $("#orderCheckout").click(function () {
-      $('#addToOrder').click();
-      if (finalTotal > 0) {
-        $('#paymentSummary').show();
-        $('#rightCard').hide();
-        var qrcode = kjua({
-          text: paymentAddress,
-          ecLevel: 'H',
-          size: 256,
-          rounded: 100,
-          quiet: 1,
-          mSize: 26,
-          mPosX: 50,
-          mPosY: 50
-        });
-        if( $('#paymentCode').is(':empty') ) {
-          $("#paymentTitle").text('Please transfer ₿' + finalTotalBCH.toFixed(8) + ' ('+ fiat + '$' + finalTotal.toFixed(2) + ') to:');
-          $("#paymentCode").append(qrcode);
-          $("#paymentAddress").text(paymentAddress);
-        }
+  <script type="text/javascript">
+    function thousands(nStr) {
+      nStr += '';
+      var x = nStr.split('.');
+      var x1 = x[0];
+      var x2 = x.length > 1 ? '.' + x[1] : '';
+      var rgx = /(\d+)(\d{3})/;
+      while (rgx.test(x1)) {
+        x1 = x1.replace(rgx, '$1' + ',' + '$2');
       }
-  });
-
-  $("#orderDone").click(function () {
-    location.reload();
-  });
-  
-  $('.button').on('click', function(evt) {
-    var buttonPressed = $(this).html();  
-    if (buttonPressed === "C") {
-      result = 0;
-      currentEntry = '0';
-    } else if (buttonPressed === "back") {
-      //currentEntry = currentEntry.substring(0, currentEntry.length-1);
-    } else if (buttonPressed === "+/-") {
-      currentEntry *= -1;
-    } else if (buttonPressed === '.') {
-      currentEntry += '.';
-    } else if (isNumber(buttonPressed)) {
-      if (currentEntry === '0') currentEntry = buttonPressed;
-      else currentEntry = currentEntry + buttonPressed;
-    } else {
-      currentEntry = '';
+      return x1 + x2;
     }
-    
-    updateScreen(currentEntry);
-  });
-});
 
-updateScreen = function(displayValue) {
-  var displayValue = displayValue.toString();  
-  $('#display').val(displayValue.substring(0, 10));
+    var paymentAddress = "bitcoincash:qp7zfgk6qfk0dkcf4rd40p7ergrw7fr72v6ed98y4f";
 
-};
+    var fiat = "AUD";
+    var currentExchangeRate = 0;
+    var transFeeBCH = 0.00000721;
 
-updateTotals = function() {
-  $("#orderSubTotalFiat").text('$' + subTotal.toFixed(2));
-  $("#transactionFeeFiat").text('$' + transFee.toFixed(4));
-  $("#orderTotalFiat").text('$' + finalTotal.toFixed(2));
+    var subTotal = 0;
+    var finalTotal = 0;
 
-  $("#orderSubTotalBCH").text('(₿' + subTotalBCH.toFixed(8) + ')');
-  $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
+    var transFee = 0.016;
+    var transFeeBits = 7.21;
 
-  $("#orderSubTotalBits").text(thousands(subTotalBits));
-  $("#transactionFeeBits").text(thousands(transFeeBits));
-  $("#orderTotalBits").text(thousands(finalTotalBits));
-};
+    var subTotalBCH = 0;
+    var finalTotalBCH = 0;
 
-isNumber = function(value) {
-  return !isNaN(value);
-};
+    $(document).ready(function () {
+      $('#paymentSummary').hide();
+      $('#displayFiat').text(fiat);
 
-operate = function(a, b, operation) {
-  a = parseFloat(a);
-  b = parseFloat(b);
-  console.log(a, b, operation);
-  if (operation === '+') return a + b;
-  if (operation === '-') return a - b;
-  if (operation === '*') return a * b;
-  if (operation === '/') return a / b;
-}
-</script>
-<style>
-  .orderTotal {
-  color: rgba(255,255,255,1);
-}
-</style>
+
+// 'url': 'https://api.coinbase.com/v2/exchange-rates?currency=BCH',
+// 'price_key': 'data.rates.{cur}',
+
+/* from https://github.com/simon-v/minipos/blob/master/bch.py
+
+'url': 'https://cashexplorer.bitcoin.com/api/addr/{address}',
+		'balance_key': 'balance',
+		'confirmed_key': None,
+		'unconfirmed_key': 'unconfirmedBalance',
+		'unit_satoshi': False,
+		'prefixes': '13',
+
+    'url': 'https://bch-insight.bitpay.com/api/addr/{address}',
+		'balance_key': 'balance',
+		'confirmed_key': None,
+		'unconfirmed_key': 'unconfirmedBalance',
+		'unit_satoshi': False,
+		'prefixes': 'CH',
+
+    'url': 'https://bch-bitcore2.trezor.io/api/addr/{address}',
+		'balance_key': 'balance',
+		'confirmed_key': None,
+		'unconfirmed_key': 'unconfirmedBalance',
+		'unit_satoshi': False,
+		'prefixes': '13',
+*/
+      $.get("https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/?convert=" + fiat, function (data, status) {
+        var dateVar = "2010-10-30";
+        var exchangeUpdated = new Date(dateVar);
+        currentExchangeRate = data[0].price_aud;
+        console.log(currentExchangeRate);
+        console.log(exchangeUpdated);
+      });
+
+      transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
+      $('#transactionFee').text('Recommended transaction fee: ' + transFeeBits + ' bits (' + fiat + '$' + transFee + ')');
+
+      var result = 0;
+      var prevEntry = 0;
+      var operation = null;
+      var currentEntry = '0';
+      updateScreen(result);
+
+      $("#clearInput").click(function () {
+        updateScreen(0);
+      });
+
+      $("#deleteItem").click(function () {
+
+      });
+
+      $("#addToOrder").click(function () {
+        var itemPrice = parseFloat($('#display').val()).toFixed(2);
+        var itemPriceBCH = 0;
+
+        if (itemPrice > 0) {
+          subTotal = parseFloat(subTotal) + parseFloat(itemPrice);
+          finalTotal = parseFloat(subTotal);
+
+          itemPriceBCH = (parseFloat(itemPrice) / parseFloat(currentExchangeRate)).toFixed(10);
+          subTotalBCH = parseFloat(subTotalBCH) + parseFloat(itemPriceBCH);
+          finalTotalBCH = parseFloat(subTotalBCH);
+
+          itemPriceBits = parseFloat(itemPriceBCH * 1000000).toFixed(2);
+          subTotalBits = parseFloat(subTotalBCH * 1000000).toFixed(2);
+          finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
+
+          $("#orderedItems").append(
+            '<div class="medium-5 large-5 column"><section><a class="deleteItem"><i class="fi-x"></i></a></section></div><div class="medium-3 large-3 column"><section><p>$' +
+            itemPrice + '</p></section></div><div class="medium-4 large-4 column"><section><p>' + thousands(
+              itemPriceBits) + '</p></section></div><hr width=0>');
+          $('#orderedItems').scrollTop($('#orderedItems')[0].scrollHeight);
+
+          updateTotals();
+        }
+      });
+
+      $("#orderCheckout").click(function () {
+        $('#addToOrder').click();
+        if (finalTotal > 0) {
+          $('#paymentSummary').show();
+          $('#rightCard').hide();
+          var qrcode = kjua({
+            text: paymentAddress,
+            ecLevel: 'H',
+            size: 256,
+            rounded: 100,
+            quiet: 1,
+            mSize: 26,
+            mPosX: 50,
+            mPosY: 50
+          });
+          if ($('#paymentCode').is(':empty')) {
+            $("#paymentTitle").text('Please transfer ₿' + finalTotalBCH.toFixed(8) + ' (' + fiat + '$' +
+              finalTotal.toFixed(2) + ') to:');
+            $("#paymentCode").append(qrcode);
+            $("#paymentAddress").text(paymentAddress);
+          }
+        }
+      });
+
+      $("#orderCancel").click(function () {
+        $('#rightCard').show();
+        $('#paymentSummary').hide();
+        $('#paymentCode').empty();
+      });
+
+      $("#orderDone").click(function () {
+        location.reload();
+      });
+
+      $('.button').on('click', function (evt) {
+        var buttonPressed = $(this).html();
+        if (buttonPressed === "C") {
+          result = 0;
+          currentEntry = '0';
+        } else if (buttonPressed === "back") {
+          //currentEntry = currentEntry.substring(0, currentEntry.length-1);
+        } else if (buttonPressed === "+/-") {
+          currentEntry *= -1;
+        } else if (buttonPressed === '.') {
+          currentEntry += '.';
+        } else if (isNumber(buttonPressed)) {
+          if (currentEntry === '0') currentEntry = buttonPressed;
+          else currentEntry = currentEntry + buttonPressed;
+        } else {
+          currentEntry = '';
+        }
+
+        updateScreen(currentEntry);
+      });
+    });
+
+    updateScreen = function (displayValue) {
+      var displayValue = displayValue.toString();
+      $('#display').val(displayValue.substring(0, 10));
+
+    };
+
+    updateTotals = function () {
+      $("#orderSubTotalFiat").text('$' + subTotal.toFixed(2));
+      $("#transactionFeeFiat").text('$' + transFee.toFixed(4));
+      $("#orderTotalFiat").text('$' + finalTotal.toFixed(2));
+
+      $("#orderSubTotalBCH").text('(₿' + subTotalBCH.toFixed(8) + ')');
+      $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
+
+      $("#orderSubTotalBits").text(thousands(subTotalBits));
+      $("#transactionFeeBits").text(thousands(transFeeBits));
+      $("#orderTotalBits").text(thousands(finalTotalBits));
+    };
+
+    isNumber = function (value) {
+      return !isNaN(value);
+    };
+
+    operate = function (a, b, operation) {
+      a = parseFloat(a);
+      b = parseFloat(b);
+      console.log(a, b, operation);
+      if (operation === '+') return a + b;
+      if (operation === '-') return a - b;
+      if (operation === '*') return a * b;
+      if (operation === '/') return a / b;
+    }
+  </script>
+  <style>
+    .orderTotal {
+      color: rgba(255, 255, 255, 1);
+    }
+  </style>
 </head>
-<body>    
+
+<body>
   <br>
   <div class="row align-center medium-unstack medium-8 large-8">
-      <div class="medium-4 large-4 columns callout">
-        <h2><i class="fi-bitcoin-circle"> CHEDDR</p></i></h2>
-        <hr>
-        <div class="large-12 medium-12 columns">
-            <div class="input-group">
-                <span class="input-group-label">$</span>
-                <input class="input-group-field" type="text" id="display">
-            </div>
+    <div class="medium-4 large-4 columns callout">
+      <h2>
+        <i class="fi-bitcoin-circle"> CHEDDR</p>
+        </i>
+      </h2>
+      <hr>
+      <div class="large-12 medium-12 columns">
+        <div class="input-group">
+          <span class="input-group-label">$</span>
+          <input class="input-group-field" type="text" id="display">
+        </div>
+      </div>
+
+      <hr>
+      <section>
+        <div class="expanded button-group">
+          <a class="hollow button">7</a>
+          <a class="hollow button">8</a>
+          <a class="hollow button">9</a>
         </div>
 
-        <hr>
+        <div class="expanded button-group">
+          <a class="hollow button">4</a>
+          <a class="hollow button">5</a>
+          <a class="hollow button">6</a>
+        </div>
+
+        <div class="expanded button-group">
+          <a class="hollow button">1</a>
+          <a class="hollow button">2</a>
+          <a class="hollow button">3</a>
+        </div>
+
+        <div class="expanded button-group">
+          <a class="hollow secondary button">.</a>
+          <a class="hollow button">0</a>
+          <a class="hollow secondary button" id="addToOrder">
+            <i class="fi-plus"></i>
+          </a>
+        </div>
+
+        <div class="expanded button-group">
+          <a class="warning button" id="clearInput">
+            <i class="fi-minus-circle"></i>
+          </a>
+
+          <a class="success button" id="orderCheckout">
+            <i class="fi-bitcoin-circle"></i>
+          </a>
+        </div>
+      </section>
+
+      <hr>
+    </div>
+    <!-- end left card -->
+
+
+    <!-- payment summary -->
+
+    <div class="large-8 medium-8 columns" id="paymentSummary">
+      <div class="callout">
+        <h5>Checkout</h5>
+        <p id="paymentTitle"></p>
+        <p id="paymentCode"></p>
+        <p id="paymentAddress"></p>
+
+        <div>
+            <p id="transactionFee"></p>
+        </div>
+
+        <p>
+        <a class="alert large-2 button" id="orderCancel"><i class="fi-x-circle"></i></a>
+        <a class="success large-2 button" id="orderDone"><i class="fi-check"></i></a>
+      </p>
+      </div>
+    </div>
+    <!-- end payment summary -->
+
+
+    <div class="medium-8 large-8 columns" id="rightCard">
+      <div class="medium-5 large-5 columns">
         <section>
-          <div class="expanded button-group">
-              <a class="hollow button">7</a>
-              <a class="hollow button">8</a>
-              <a class="hollow button">9</a>
-          </div>
-
-          <div class="expanded button-group">
-              <a class="hollow button">4</a>
-              <a class="hollow button">5</a>
-              <a class="hollow button">6</a>
-          </div>
-
-          <div class="expanded button-group">
-              <a class="hollow button">1</a>
-              <a class="hollow button">2</a>
-              <a class="hollow button">3</a>
-          </div>
-
-          <div class="expanded button-group">
-              <a class="hollow secondary button">.</a>
-              <a class="hollow button">0</a>
-              <a class="hollow secondary button" id="addToOrder"><i class="fi-plus"></i></a>
-          </div>
-
-          <div class="expanded button-group">
-              <a class="warning button" id="clearInput"><i class="fi-minus-circle"></i></a>
-              
-              <a class="success button" id="orderCheckout"><i class="fi-bitcoin-circle"></i></a>
-          </div>
+          <p>Item</p>
         </section>
-
-        <hr>
       </div>
-      <!-- end left card -->
-
-    
-      <!-- payment summary -->
-
-      <div class="large-8 medium-8 columns" id="paymentSummary">
-          <div class="callout" data-closable="slide-out-right">
-              <h5>Checkout</h5>
-              <p id="paymentTitle"></p>
-              <p id="paymentCode"></p>
-              <p id="paymentAddress"></p>
-              <a class="success button" id="orderDone"><i class="fi-check"></i></a>
-          </div>
+      <div class="medium-3 large-3 columns">
+        <section>
+          <p id="displayFiat"></p>
+        </section>
       </div>
-      <!-- end payment summary -->
+      <div class="medium-4 large-4 columns">
+        <section>
+          <p>
+            <strong>bits (µBCH)</strong>
+          </p>
+        </section>
+      </div>
+      <hr>
 
+      <!-- order summary -->
+      <div id="orderedItems" style="padding-top:28px; height: 220px; overflow-y: auto; overflow-x: hidden;">
+      </div>
+      <!-- end order summary -->
 
-      <div class="medium-8 large-8 columns" id="rightCard">
+      <hr>
+      <div id="orderSubTotal">
         <div class="medium-5 large-5 columns">
           <section>
-            <p>Item</p>
+            <h5>Sub-Total</h5>
           </section>
         </div>
         <div class="medium-3 large-3 columns">
-          <section>    
-            <p id="displayFiat"></p>
+          <section>
+            <h5 id="orderSubTotalFiat">&nbsp;</h5>
           </section>
         </div>
         <div class="medium-4 large-4 columns">
-          <section>    
-            <p><strong>bits (µBCH)</strong></p>
+          <section>
+            <h5 id="orderSubTotalBits">&nbsp;</h5>
           </section>
         </div>
-        <hr>
+      </div>
 
-        <!-- order summary -->
-        <div id="orderedItems" style="padding-top:28px; height: 395px; overflow-y: auto; overflow-x: hidden;">
-        </div>
-        <!-- end order summary -->
+      <hr>
 
-        <hr>
-        <div id="orderSubTotal">
-          <div class="medium-5 large-5 columns">
-              <section>
-                <h5>Sub-Total</h5>
-              </section>
-          </div>
-          <div class="medium-3 large-3 columns">
-              <section>    
-                <h5 id="orderSubTotalFiat">&nbsp;</h5>
-                </section>
-              </div>
-              <div class="medium-4 large-4 columns">
-              <section>
-                <h4 id="orderSubTotalBits">&nbsp;</h4>  
-              </section>  
-          </div>      
+      <div id="orderTotal">
+        <div class="medium-5 large-5 columns">
+          <section>
+            <h2 class="orderTotal">Total</h2>
+          </section>
         </div>
-    
-        <div id="orderFees">
-          <div class="medium-5 large-5 columns">
-              <section>
-                <p>Transaction Fee</p>
-              </section>
-          </div>
-          <div class="medium-3 large-3 columns">
-              <section>
-                <p id="transactionFeeFiat"></p>
-              </section>
-              </div>
-              <div class="medium-4 large-4 columns">
-              <section>
-                <p id="transactionFeeBits"></p>
-              </section>
-          </div>
+        <div class="medium-3 large-3 columns">
+          <section style="padding-top: 15px;">
+            <h4 class="orderTotal" id="orderTotalFiat">&nbsp;</h4>
+          </section>
         </div>
-    
-        <hr>
-    
-        <div id="orderTotal">
-          <div class="medium-5 large-5 columns">
-            <section>
-              <h2 class="orderTotal">Total</h2>
-            </section>
-          </div>
-          <div class="medium-3 large-3 columns">
-            <section style="padding-top: 15px;">    
-              <h4 class="orderTotal" id="orderTotalFiat">&nbsp;</h4>
-            </section>
-          </div>
-          <div class="medium-4 large-4 columns">
-            <section>
-                <h2 class="orderTotal" id="orderTotalBits" >&nbsp;</h2>
-            </section>
-            <section>
-                <h4 class="orderTotal" id="orderTotalBCH"></h4></p>
-            </section>
-          </div>    
+        <div class="medium-4 large-4 columns">
+          <section>
+            <h2 class="orderTotal" id="orderTotalBits">&nbsp;</h2>
+          </section>
+          <section>
+            <h4 class="orderTotal" id="orderTotalBCH"></h4>
+            </p>
+          </section>
         </div>
+      </div>
 
     </div>
   </div>
-</body></html>
+</body>
+
+</html>
