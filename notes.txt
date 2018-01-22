@@ -1,4 +1,5 @@
 BCH API: https://bch.btc.com/api-doc
+https://bitcoincashjs.github.io/#Examples
 
 // Foundation Modals
 
