@@ -87,27 +87,85 @@ function thousands (nStr) {
     return x1 + x2;
 }
 
+function updateCount() {
+    var items = $('tr[class=orderItem]').length;
+    $('#orderItem').text(items);
+}
+
 updateScreen = function (displayValue) {
     var displayValue = displayValue.toString();
     $('#display').val(displayValue.substring(0, 10));
 };
 
+updateTable = function () {
+    $('table').each(function() {
+        $('tr:even',  this).addClass('primary');
+        $('tr:odd', this).removeClass('primary');
+    });
+};
+
 updateTotals = function () {
-    $('#transactionFee').text('Recommended transaction fee: ');
-    $('#transFeeRecommended').text(transFeeBits);
+    updateTable();
+    var finalTotalBits = 0;
+    $(".orderPriceBits").each(function() {
+        orderPriceB = $(this).text().replace(',', '');
+        finalTotalBits += parseFloat(orderPriceB);
+    });
+    $("#orderTotalBits").text(thousands(finalTotalBits.toFixed(2)));
 
-    $("#orderSubTotalFiat").text('$' + subTotal.toFixed(2));
-    $("#transactionFeeFiat").text('$' + transFee.toFixed(4));
-    $("#orderTotalFiat").text('$' + finalTotal.toFixed(2));
+    var finalTotalFiat = 0;
+    $(".orderPriceFiat").each(function() {
+        orderPriceText = $(this).text().replace('$', '');
+        finalTotalFiat += parseFloat(orderPriceText);
+    });
+    $("#orderTotalFiat").text('$' + finalTotalFiat.toFixed(2));
 
-    $("#orderSubTotalBCH").text('(₿' + subTotalBCH.toFixed(8) + ')');
+    finalTotalBCH = finalTotalBits / 1000000;
     $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
-
-    $("#orderSubTotalBits").text(thousands(subTotalBits));
-    $("#transactionFeeBits").text(thousands(transFeeBits));
-    $("#orderTotalBits").text(thousands(finalTotalBits));
 };
 
 isNumber = function (value) {
     return !isNaN(value);
 };
+
+function tally (selector) {
+    $(selector).each(function () {
+        var total = 0,
+            column = $(this).siblings(selector).andSelf().index(this);
+        $(this).parents().prevUntil(':has(' + selector + ')').each(function () {
+            total += parseFloat($('td.orderPrice:eq(' + column + ')', this).html()) || 0;
+        })
+        $(this).html(total);
+    });
+}
+	
+/*
+
+    var sumTotal = 0;
+    var sumTotalBits = 0;
+    var $tblrows = $("#orderedItems tr");
+    $tblrows.each(function (index) {
+        var $tblrow = $(this);
+        var orderPriceBits = $tblrow.find("[name=orderPriceBits]").text();
+        var orderPrice = parseFloat($tblrow.find("[name=orderPrice]").text());
+        console.log("Price:" + orderPrice);
+        console.log("Price:" + orderPriceBits);
+        if (!isNaN(orderPrice)) {
+            $tblrow.find('.orderPrice').text(parseFloat(orderPrice));
+            $(".orderPrice").each(function () {
+                var stval = parseFloat($(this).text());
+                console.log("price:" + stval);
+                sumTotal += isNaN(stval) ? 0 : stval;
+            });
+        }
+        if (!isNaN(orderPriceBits)) {
+            $tblrow.find('.orderPriceBits').text(parseFloat(orderPriceBits));
+            var sumTotalBits = 0;
+            $(".orderPriceBits").each(function () {
+                var stval = parseFloat($(this).text());
+                console.log(stval);
+                sumTotalBits += isNaN(stval) ? 0 : stval;
+            });
+        }
+    })
+    */

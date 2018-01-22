@@ -7,6 +7,9 @@ body {
   padding: 0;
 }
 
+th {
+  text-align: center;
+}
   .orderTotal {
     color: rgba(255, 255, 255, 1);
 }

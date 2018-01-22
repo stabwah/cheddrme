@@ -1,14 +1,5 @@
 BCH API: https://bch.btc.com/api-doc
 
-// Settings
-
-<label>Fiat Currency
-  <select>
-    <option value="AUD">AUD</option>
-    <option value="USD">USD</option>
-  </select>
-</label>
-
 // Foundation Modals
 
 <p><button class="button" data-open="exampleModal2">Click me for a modal</button></p>
@@ -35,58 +26,7 @@ BCH API: https://bch.btc.com/api-doc
 
 FROM https://codepen.io/ccalbaugh/pen/GorbJx
 
-// UPDATE ITEM COUNTS
-function updateCount() {
-    var items = $('li[class=orderItems]').length;
-    $('#orderTotalItems').text(items);
-  }
-  updateCount();
-});
-
-// ADD ORDER ITEM
-  $newItemForm.on('submit', function(e) {
-    e.preventDefault();
-    var text = $('input:text').val();
-    $list.append('<li>' + text + '</li>');
-    $('input:text').val('');
-    updateCount();
-  });
-  
-// REMOVE ITEM
- //CLICK HANDLING - USES DELEGATION ON <ul> ELEMENT
-  $list.on('click', 'li', function() {
-    var $this = $(this);
-    var complete = $this.hasClass('complete');
-    
-    if (complete === true) {
-      $this.animate({
-        opacity: 0.0,
-        paddingLeft: '+=180'
-      }, 500, 'swing', function() {
-        $this.remove();
-      });
-    } else {
-      item = $this.text();
-      $this.remove();
-      $list
-      .append('<li class=\"complete\">' + item + '</li>')
-      .hide().fadeIn(300);
-      updateCount();
-    }
-  });
-
-//
-//
-//
-
 var array = [];
 $('.myList li').each(function(i, li) {
   array.push($(li));
 });
-
-
-<list>
-    <li>
-    </li>
-</list>
-
