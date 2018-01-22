@@ -117,7 +117,7 @@
         finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
 
         $("#orderedItems").append('<tr><td><i class="fi-x">&nbsp;</i></td><td>$' + itemPrice + '</td><td>' + thousands(itemPriceBits) + '</td></tr><hr width=0>');
-        $('#orderedItems').scrollTop($('#orderedItems')[0].scrollHeight);
+        $('#itemList').scrollTop($('#itemList')[0].scrollHeight);
 
         updateTotals();
     } 
@@ -128,6 +128,7 @@
       if (finalTotal > 0) {
           $('#paymentSummary').show();
           $('#rightCard').hide();
+          $('#itemList').hide();
           var qrcode = kjua({
           text: paymentAddress,
           ecLevel: 'H',
@@ -154,6 +155,7 @@
 
     $("#orderCancel").click(function () {
       $('#rightCard').show();
+      $('#itemList').show();
       $('#paymentSummary').hide();
       $('#paymentCode').empty();
     });
@@ -237,11 +239,11 @@
 
         <div class="expanded button-group">
           <a class="warning button" id="clearInput">
-            <i class="fi-minus-circle"></i>
+            <i class="fi-refresh"></i>
           </a>
 
-          <a class="success hollow button" id="orderCheckout">
-            <img src="images/BitcoinCashLogo64.png"><br />
+          <a class="success button" id="orderCheckout">
+            <i class="fi-shopping-cart"></i>
           </a>
         </div>
       </section>
@@ -279,8 +281,8 @@
 
         <hr>
         <div>
-          <a class="alert large-2 button" id="orderCancel"><i class="fi-x-circle"> Cancel</i></a>
-          <a class="success large-2 button" id="orderDone"><i class="fi-check"> Done</i></a>
+          <a class="alert large-2 button" id="orderCancel"><i class="fi-x"></i></a>
+          <a class="success large-2 button" id="orderDone"><i class="fi-check"></i></a>
         </div>
       </div>
     </div>
@@ -288,8 +290,8 @@
 
 
     <!-- order summary -->
-    <div class="large-8 columns">
-      <table width="100%">
+    <div class="large-8 columns" id="itemList" style="height: 31em; overflow-y: auto; overflow-x: hidden;">
+      <table width="80%">
           <thead>
           <tr>
               <th width="10px;">Item</th>
@@ -297,7 +299,7 @@
               <th width="30px;">bits (µBCH)</th>
           </tr>
           </thead>
-          <tbody id="orderedItems" style="height: 500px; overflow-y: auto; overflow-x: hidden;">
+          <tbody id="orderedItems">
           </tbody>
       </table>
     </div>
@@ -307,6 +309,7 @@
 
     <!-- totals -->
     <div class="large-8 columns">
+      <!--
       <div id="orderSubTotal">
         <div class="medium-5 large-5 columns">
           <section>
@@ -326,7 +329,7 @@
       </div>
 
       <hr>
-
+      -->
       <div id="orderTotal">
         <div class="medium-5 large-5 columns">
           <section>
