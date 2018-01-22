@@ -5,233 +5,200 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CHEDDR</title>
-  <link rel="stylesheet" href="css/foundation.css" />
-  <link rel="stylesheet" href="css/motion-ui.css" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/foundation-icons.css" />
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css" rel="stylesheet">
-  <script type="text/javascript" src="./js/kjua-0.1.1.min.js"></script>
-  <script src="js/vendor/modernizr.js"></script>
 
-  <script src="js/vendor/jquery.js"></script>
-  <script src="js/vendor/motion-ui.js"></script>
-  <script src="js/foundation.min.js"></script>
-  <script src="js/script.js"></script>
+  <link rel="stylesheet" href="css/cheddrme.css" />
+  <link rel="stylesheet" href="css/foundation.css" />
+  <link rel="stylesheet" href="css/foundation-icons.css" />
+  <link rel="stylesheet" href="css/toastr.min.css"/>
+  <script type="text/javascript" src="js/vendor/jquery.js"></script>  
+  <script type="text/javascript" src="js/foundation.min.js"></script>
+  <script type="text/javascript" src="js/kjua-0.1.1.min.js"></script>
+  <script type="text/javascript" src="js/toastr.min.js"></script>
+  <script type="text/javascript" src="js/cheddrme.js"></script>
+
+  <!--
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/kjua@0.1.2/dist/kjua.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  -->
+  
 
   <script type="text/javascript">
-    function thousands(nStr) {
-      nStr += '';
-      var x = nStr.split('.');
-      var x1 = x[0];
-      var x2 = x.length > 1 ? '.' + x[1] : '';
-      var rgx = /(\d+)(\d{3})/;
-      while (rgx.test(x1)) {
-        x1 = x1.replace(rgx, '$1' + ',' + '$2');
-      }
-      return x1 + x2;
-    }
+  var paymentAddress = "bitcoincash:qp7zfgk6qfk0dkcf4rd40p7ergrw7fr72v6ed98y4f";
 
-    var paymentAddress = "bitcoincash:qp7zfgk6qfk0dkcf4rd40p7ergrw7fr72v6ed98y4f";
+  var fiat = "AUD";
+  var currentExchangeRate = 0;
+  var transFee = 0;
 
-    var fiat = "AUD";
-    var currentExchangeRate = 0;
-    var transFeeBCH = 0.00000721;
+  var transFeeBCH = 0.00000681;
+  var transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
 
-    var subTotal = 0;
-    var finalTotal = 0;
+  var subTotal = 0;
+  var finalTotal = 0;
 
-    var transFee = 0.016;
-    var transFeeBits = 7.21;
+  var subTotalBits = 0;
+  var finalTotalBits = 0;
 
-    var subTotalBCH = 0;
-    var finalTotalBCH = 0;
+  var subTotalBCH = 0;
+  var finalTotalBCH = 0;
 
-    $(document).ready(function () {
-      $('#paymentSummary').hide();
-      $('#displayFiat').text(fiat);
+  toastr.options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": false,
+    "progressBar": false,
+    "positionClass": "toast-top-left",
+    "preventDuplicates": false,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "5000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+  }
 
+  $(document).ready(function () {
+    $('#paymentSummary').hide();
+    $('#displayFiat').text(fiat);
 
-// 'url': 'https://api.coinbase.com/v2/exchange-rates?currency=BCH',
-// 'price_key': 'data.rates.{cur}',
+    $("table#orderTable tr:even").css("background-color", "#F4F4F8");
+    $("table#orderTable tr:odd").css("background-color", "#EFF1F1");
 
-/* from https://github.com/simon-v/minipos/blob/master/bch.py
-
-'url': 'https://cashexplorer.bitcoin.com/api/addr/{address}',
-		'balance_key': 'balance',
-		'confirmed_key': None,
-		'unconfirmed_key': 'unconfirmedBalance',
-		'unit_satoshi': False,
-		'prefixes': '13',
-
-    'url': 'https://bch-insight.bitpay.com/api/addr/{address}',
-		'balance_key': 'balance',
-		'confirmed_key': None,
-		'unconfirmed_key': 'unconfirmedBalance',
-		'unit_satoshi': False,
-		'prefixes': 'CH',
-
-    'url': 'https://bch-bitcore2.trezor.io/api/addr/{address}',
-		'balance_key': 'balance',
-		'confirmed_key': None,
-		'unconfirmed_key': 'unconfirmedBalance',
-		'unit_satoshi': False,
-		'prefixes': '13',
-*/
-      $.get("https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/?convert=" + fiat, function (data, status) {
+    $.get("https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/?convert=" + fiat)
+      .then( function (data, status) {
         var dateVar = "2010-10-30";
         var exchangeUpdated = new Date(dateVar);
         currentExchangeRate = data[0].price_aud;
-        console.log(currentExchangeRate);
-        console.log(exchangeUpdated);
-      });
+        if (currentExchangeRate > 0) {
+          toastr.info('1 BCH = ' + fiat + '$' + parseFloat(currentExchangeRate).toFixed(2));
+          transFee = parseFloat(transFeeBCH * currentExchangeRate);
+          transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
+        } else { 
+          toastr.error('Could not retrieve exchange rate');
+        } })
+      .fail( function() {
+          toastr.error('Could not retrieve exchange rate');
+    });
 
-      transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
-      $('#transactionFee').text('Recommended transaction fee: ' + transFeeBits + ' bits (' + fiat + '$' + transFee + ')');
+    var result = 0;
+    var prevEntry = 0;
+    var operation = null;
+    var currentEntry = '0';
+    updateScreen(result);
 
-      var result = 0;
-      var prevEntry = 0;
-      var operation = null;
-      var currentEntry = '0';
-      updateScreen(result);
+    $("#clearInput").click(function () {
+    updateScreen(0);
+    });
 
-      $("#clearInput").click(function () {
-        updateScreen(0);
-      });
+    $("#deleteItem").click(function () {
 
-      $("#deleteItem").click(function () {
+    });
 
-      });
+    $("#addToOrder").click(function () {
+    var itemPrice = parseFloat($('#display').val()).toFixed(2);
+    var itemPriceBCH = 0;
 
-      $("#addToOrder").click(function () {
-        var itemPrice = parseFloat($('#display').val()).toFixed(2);
-        var itemPriceBCH = 0;
+    if (itemPrice > 0) {
+        subTotal = parseFloat(subTotal) + parseFloat(itemPrice);
+        finalTotal = parseFloat(subTotal);
 
-        if (itemPrice > 0) {
-          subTotal = parseFloat(subTotal) + parseFloat(itemPrice);
-          finalTotal = parseFloat(subTotal);
+        itemPriceBCH = (parseFloat(itemPrice) / parseFloat(currentExchangeRate)).toFixed(10);
+        subTotalBCH = parseFloat(subTotalBCH) + parseFloat(itemPriceBCH);
+        finalTotalBCH = parseFloat(subTotalBCH);
 
-          itemPriceBCH = (parseFloat(itemPrice) / parseFloat(currentExchangeRate)).toFixed(10);
-          subTotalBCH = parseFloat(subTotalBCH) + parseFloat(itemPriceBCH);
-          finalTotalBCH = parseFloat(subTotalBCH);
+        itemPriceBits = parseFloat(itemPriceBCH * 1000000).toFixed(2);
+        subTotalBits = parseFloat(subTotalBCH * 1000000).toFixed(2);
+        finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
 
-          itemPriceBits = parseFloat(itemPriceBCH * 1000000).toFixed(2);
-          subTotalBits = parseFloat(subTotalBCH * 1000000).toFixed(2);
-          finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
+        $("#orderedItems").append('<tr><td><i class="fi-x">&nbsp;</i></td><td>$' + itemPrice + '</td><td>' + thousands(itemPriceBits) + '</td></tr><hr width=0>');
+        $('#orderedItems').scrollTop($('#orderedItems')[0].scrollHeight);
 
-          $("#orderedItems").append(
-            '<div class="medium-5 large-5 column"><section><a class="deleteItem"><i class="fi-x"></i></a></section></div><div class="medium-3 large-3 column"><section><p>$' +
-            itemPrice + '</p></section></div><div class="medium-4 large-4 column"><section><p>' + thousands(
-              itemPriceBits) + '</p></section></div><hr width=0>');
-          $('#orderedItems').scrollTop($('#orderedItems')[0].scrollHeight);
+        updateTotals();
+    } 
+    });
 
-          updateTotals();
-        }
-      });
-
-      $("#orderCheckout").click(function () {
-        $('#addToOrder').click();
-        if (finalTotal > 0) {
+    $("#orderCheckout").click(function () {
+      $('#addToOrder').click();
+      if (finalTotal > 0) {
           $('#paymentSummary').show();
           $('#rightCard').hide();
           var qrcode = kjua({
-            text: paymentAddress,
-            ecLevel: 'H',
-            size: 256,
-            rounded: 100,
-            quiet: 1,
-            mSize: 26,
-            mPosX: 50,
-            mPosY: 50
+          text: paymentAddress,
+          ecLevel: 'H',
+          size: 256,
+          rounded: 100,
+          quiet: 0,
+          mSize: 26,
+          mPosX: 50,
+          mPosY: 50
           });
           if ($('#paymentCode').is(':empty')) {
-            $("#paymentTitle").text('Please transfer ₿' + finalTotalBCH.toFixed(8) + ' (' + fiat + '$' +
-              finalTotal.toFixed(2) + ') to:');
+            /* $("#paymentTitle").text
+            /* ' (' + fiat + '$' +
+                finalTotal.toFixed(2) + ') to:'); */
+            $("#paymentTitle").empty();
+            $("#paymentTitle").append('Please transfer <span class="success label finalTotal">₿' + finalTotalBCH.toFixed(8) + '</span> to:');
             $("#paymentCode").append(qrcode);
-            $("#paymentAddress").text(paymentAddress);
+            $("#paymentAddress").val(paymentAddress);
           }
-        }
-      });
-
-      $("#orderCancel").click(function () {
-        $('#rightCard').show();
-        $('#paymentSummary').hide();
-        $('#paymentCode').empty();
-      });
-
-      $("#orderDone").click(function () {
-        location.reload();
-      });
-
-      $('.button').on('click', function (evt) {
-        var buttonPressed = $(this).html();
-        if (buttonPressed === "C") {
-          result = 0;
-          currentEntry = '0';
-        } else if (buttonPressed === "back") {
-          //currentEntry = currentEntry.substring(0, currentEntry.length-1);
-        } else if (buttonPressed === "+/-") {
-          currentEntry *= -1;
-        } else if (buttonPressed === '.') {
-          currentEntry += '.';
-        } else if (isNumber(buttonPressed)) {
-          if (currentEntry === '0') currentEntry = buttonPressed;
-          else currentEntry = currentEntry + buttonPressed;
         } else {
-          currentEntry = '';
+          toastr.error('No items to checkout');
         }
-
-        updateScreen(currentEntry);
-      });
     });
 
-    updateScreen = function (displayValue) {
-      var displayValue = displayValue.toString();
-      $('#display').val(displayValue.substring(0, 10));
+    $("#orderCancel").click(function () {
+      $('#rightCard').show();
+      $('#paymentSummary').hide();
+      $('#paymentCode').empty();
+    });
 
-    };
+    $("#orderDone").click(function () {
+      location.reload();
+    });
 
-    updateTotals = function () {
-      $("#orderSubTotalFiat").text('$' + subTotal.toFixed(2));
-      $("#transactionFeeFiat").text('$' + transFee.toFixed(4));
-      $("#orderTotalFiat").text('$' + finalTotal.toFixed(2));
-
-      $("#orderSubTotalBCH").text('(₿' + subTotalBCH.toFixed(8) + ')');
-      $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
-
-      $("#orderSubTotalBits").text(thousands(subTotalBits));
-      $("#transactionFeeBits").text(thousands(transFeeBits));
-      $("#orderTotalBits").text(thousands(finalTotalBits));
-    };
-
-    isNumber = function (value) {
-      return !isNaN(value);
-    };
-
-    operate = function (a, b, operation) {
-      a = parseFloat(a);
-      b = parseFloat(b);
-      console.log(a, b, operation);
-      if (operation === '+') return a + b;
-      if (operation === '-') return a - b;
-      if (operation === '*') return a * b;
-      if (operation === '/') return a / b;
+    $('.button').on('click', function (evt) {
+    var buttonPressed = $(this).html();
+    if (buttonPressed === "C") {
+        result = 0;
+        currentEntry = '0';
+    } else if (buttonPressed === "back") {
+        //currentEntry = currentEntry.substring(0, currentEntry.length-1);
+    } else if (buttonPressed === "+/-") {
+        currentEntry *= -1;
+    } else if (buttonPressed === '.') {
+        currentEntry += '.';
+    } else if (isNumber(buttonPressed)) {
+        if (currentEntry === '0') currentEntry = buttonPressed;
+        else currentEntry = currentEntry + buttonPressed;
+    } else {
+        currentEntry = '';
     }
+
+    updateScreen(currentEntry);
+    });
+
+    $("#copyPaymentAddress").click(function () {
+      copyToClipboard(document.getElementById("paymentAddress"));
+      toastr.success('Copied to clipboard')
+    });
+
+});
   </script>
-  <style>
-    .orderTotal {
-      color: rgba(255, 255, 255, 1);
-    }
-  </style>
 </head>
 
 <body>
   <br>
-  <div class="row align-center medium-unstack medium-8 large-8">
-    <div class="medium-4 large-4 columns callout">
-      <h2>
-        <i class="fi-bitcoin-circle"> CHEDDR</p>
-        </i>
-      </h2>
+  <div class="row align-center medium-unstack medium-8 large-8 text-center">
+    <div class="medium-4 large-4 columns callout text-center">
+
+      <h2><i class="fi-bitcoin-circle"> </i>CHEDDR</h2>
+
       <hr>
       <div class="large-12 medium-12 columns">
         <div class="input-group">
@@ -263,7 +230,7 @@
         <div class="expanded button-group">
           <a class="hollow secondary button">.</a>
           <a class="hollow button">0</a>
-          <a class="hollow secondary button" id="addToOrder">
+          <a class="hollow success button" id="addToOrder">
             <i class="fi-plus"></i>
           </a>
         </div>
@@ -273,8 +240,8 @@
             <i class="fi-minus-circle"></i>
           </a>
 
-          <a class="success button" id="orderCheckout">
-            <i class="fi-bitcoin-circle"></i>
+          <a class="success hollow button" id="orderCheckout">
+            <img src="images/BitcoinCashLogo64.png"><br />
           </a>
         </div>
       </section>
@@ -285,53 +252,61 @@
 
 
     <!-- payment summary -->
-
-    <div class="large-8 medium-8 columns" id="paymentSummary">
+    <div class="large-7 medium-7 columns text-center" id="paymentSummary">
       <div class="callout">
-        <h5>Checkout</h5>
+        <h5>Checkout</h5><hr>
+        
         <p id="paymentTitle"></p>
-        <p id="paymentCode"></p>
-        <p id="paymentAddress"></p>
-
-        <div>
-            <p id="transactionFee"></p>
+        
+        <div class="input-group">
+            <input class="input-group-field" type="text" id="paymentAddress">
+            <div class="input-group-button">
+                <button id="copyPaymentAddress" data-clipboard-target="#paymentAddress">
+                <i class="fi-clipboard"></i>
+                </button>
+          </div>
         </div>
 
-        <p>
-        <a class="alert large-2 button" id="orderCancel"><i class="fi-x-circle"></i></a>
-        <a class="success large-2 button" id="orderDone"><i class="fi-check"></i></a>
-      </p>
+        <div>
+          <p>or scan QR Code:</p>
+          <p id="paymentCode"></p>
+        </div>
+
+        <div>
+            <span id="transactionFee"></span>
+            <span class="warning round radius label" id="transFeeRecommended"></span> bits per kilobyte
+        </div>
+
+        <hr>
+        <div>
+          <a class="alert large-2 button" id="orderCancel"><i class="fi-x-circle"> Cancel</i></a>
+          <a class="success large-2 button" id="orderDone"><i class="fi-check"> Done</i></a>
+        </div>
       </div>
     </div>
     <!-- end payment summary -->
 
 
-    <div class="medium-8 large-8 columns" id="rightCard">
-      <div class="medium-5 large-5 columns">
-        <section>
-          <p>Item</p>
-        </section>
-      </div>
-      <div class="medium-3 large-3 columns">
-        <section>
-          <p id="displayFiat"></p>
-        </section>
-      </div>
-      <div class="medium-4 large-4 columns">
-        <section>
-          <p>
-            <strong>bits (µBCH)</strong>
-          </p>
-        </section>
-      </div>
-      <hr>
+    <!-- order summary -->
+    <div class="large-8 columns">
+      <table width="100%">
+          <thead>
+          <tr>
+              <th width="10px;">Item</th>
+              <th width="20px;" id="displayFiat"></th>
+              <th width="30px;">bits (µBCH)</th>
+          </tr>
+          </thead>
+          <tbody id="orderedItems" style="height: 500px; overflow-y: auto; overflow-x: hidden;">
+          </tbody>
+      </table>
+    </div>
+    <!-- end order summary -->
 
-      <!-- order summary -->
-      <div id="orderedItems" style="padding-top:28px; height: 220px; overflow-y: auto; overflow-x: hidden;">
-      </div>
-      <!-- end order summary -->
+    <hr>
 
-      <hr>
+    <!-- totals -->
+    <div class="large-8 columns">
       <div id="orderSubTotal">
         <div class="medium-5 large-5 columns">
           <section>
@@ -369,12 +344,20 @@
           </section>
           <section>
             <h4 class="orderTotal" id="orderTotalBCH"></h4>
-            </p>
           </section>
         </div>
       </div>
-
+      </div>
     </div>
+    <!-- end totals -->
+    
+    <!-- end right card -->
+
+    <!-- start footer -->
+    <div class="medium-12 large-12 columns text-center">
+       
+    </div>
+    <!-- end footer --> 
   </div>
 </body>
 
