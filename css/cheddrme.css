@@ -1,8 +1,9 @@
-@import url(https://fonts.googleapis.com/css?family=Oswald);
+@import url(https://fonts.googleapis.com/css?family=Roboto);
+@import url(https://fonts.googleapis.com/css?family=Lato);
+@import url(https://fonts.googleapis.com/css?family=Raleway);
 
 body {
-  background-color: #000;
-  font-family: 'Oswald', 'Futura', sans-serif;
+  font-family: 'Roboto', 'Lato', sans-serif;
   margin: 0; 
   padding: 0;
 }
@@ -10,6 +11,11 @@ body {
 th {
   text-align: center;
 }
-  .orderTotal {
+
+.inputAddress {
+  width: 10em;  
+}
+
+.orderTotal {
     color: rgba(255, 255, 255, 1);
 }

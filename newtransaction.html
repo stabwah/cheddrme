@@ -15,6 +15,8 @@
   <script type="text/javascript" src="js/toastr.min.js"></script>
   <script type="text/javascript" src="js/kjua-0.1.1.min.js"></script>
   <script type="text/javascript" src="js/wallet-address-validator.min.js"></script>
+  <script type="text/javascript" src="js/sha256.min.js"></script>
+  <script type="text/javascript" src="js/cashaddr.js"></script>
   <script type="text/javascript" src="js/cheddrme.js"></script>
 
   <!--
@@ -26,9 +28,9 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
   -->
   
-
   <script type="text/javascript">
   var paymentAddress = "bitcoincash:qp7zfgk6qfk0dkcf4rd40p7ergrw7fr72v6ed98y4f";
+  // legacy = "1CKQgK1f5ZiRwb7DJM7pKKDaJuzE3mTKt8"
 
   var fiat = "AUD";
   var currentExchangeRate = 0;
@@ -65,27 +67,9 @@
   }
 
   $(document).ready(function () {
-    $('#paymentSummary').hide();
-    $('#displayFiat').text(fiat);
-
-    $.get("https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/?convert=" + fiat)
-      .then( function (data, status) {
-        var dateVar = "2010-10-30";
-        var exchangeUpdated = new Date(dateVar);
-        currentExchangeRate = data[0].price_aud;
-        if (currentExchangeRate > 0) {
-          toastr.info('1 BCH = ' + fiat + '$' + parseFloat(currentExchangeRate).toFixed(2));
-          transFee = parseFloat(transFeeBCH * currentExchangeRate);
-          transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
-          $('#transactionFee').text('Recommended transaction fee: ');
-          $('#transFeeRecommended').text(transFeeBits);
-          $("#transactionFeeFiat").text('$' + transFee.toFixed(4));
-        } else { 
-          toastr.error('Could not retrieve exchange rate');
-        } })
-      .fail( function() {
-          toastr.error('Could not retrieve exchange rate');
-    });
+    $("#paymentSummary").hide();
+    $("#displayFiat").text(fiat);
+    getExchRate(fiat); 
 
     var result = 0;
     var prevEntry = 0;
@@ -93,23 +77,46 @@
     var currentEntry = '0';
     updateScreen(result);
 
+    /* start settings */
     $("#addPaymentAddress").click(function () {
-      var newAddress = $('#inputAddress').val();
-      var valid = WAValidator.validate(newAddress, 'BCH');
+      var newAddress = $("#inputAddress").val();
+      var valid = WAValidator.validate(newAddress, "BCH");
       if(valid) {
-          toastr.info('Recieve address added');
-          $("#myAddresses").append(newAddress + '<br>');
+          if (dupeAddress(newAddress) === 0) {
+            toastr.success("Converting Legacy Address...");
+            var cashaddr = parseAndConvertOldAddress(newAddress);
+            console.log(cashaddr);
+            toastr.info("Recieve address added");
+            $("#myAddresses").append('<div><span><a href="#" class="removeAddress"><i class="fi-trash"></i></a></span>&nbsp;<span class="addedAddress">' + cashaddr + '</span></div>');
+          } else {
+            toastr.error("This address already exists");
+          }
       } else {
-          toastr.warning('Invalid address');
+          toastr.warning("Invalid address");
       }
     });
 
+    $(document).on("click","a.removeAddress", function() {
+      $($(this).closest("div")).remove();
+      toastr.info("Recieve address removed");
+      return false;
+    });
+
+    $("select").on("change", function() {
+      toastr.info(this.value);
+      fiat = this.value;
+      $("#displayFiat").text(fiat);
+      getExchRate(fiat);
+    })
+    /* end settings */
+
+    /* start input */
     $("#clearInput").click(function () {
     updateScreen(0);
     });
 
     $("#addToOrder").click(function () {
-    var itemPrice = parseFloat($('#display').val()).toFixed(2);
+    var itemPrice = parseFloat($("#display").val()).toFixed(2);
     var itemPriceBCH = 0;
 
     if (itemPrice > 0) {
@@ -124,8 +131,8 @@
         subTotalBits = parseFloat(subTotalBCH * 1000000).toFixed(2);
         finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
 
-        $("#orderedItems").append('<tr class="orderItem"><td><a href="#" class="deleteRow"><i class="fi-x"></i></a></td><td class="orderPriceFiat">$' + itemPrice + '</td><td class="orderPriceBits">' + thousands(itemPriceBits) + '</td></tr>');
-        $('#itemList').scrollTop($('#itemList')[0].scrollHeight);
+        $("#orderedItems").append('<tr class="orderItem"><td><a href="#" class="deleteRow"><i class="fi-trash"></i></a></td><td class="orderPriceFiat">$' + itemPrice + '</td><td class="orderPriceBits">' + thousands(itemPriceBits) + '</td></tr>');
+        $("#itemList").scrollTop($("#itemList")[0].scrollHeight);
 
         updateTotals();
     } 
@@ -138,10 +145,10 @@
     });
 
     $("#orderCheckout").click( function () {
-      $('#addToOrder').click();
+      $("#addToOrder").click();
       if (finalTotal > 0) {
-          $('#paymentSummary').show();
-          $('#itemList').hide();
+          $("#paymentSummary").show();
+          $("#itemList").hide();
           var qrcode = kjua({
           text: paymentAddress,
           ecLevel: 'H',
@@ -152,10 +159,7 @@
           mPosX: 50,
           mPosY: 50
           });
-          if ($('#paymentCode').is(':empty')) {
-            /* $("#paymentTitle").text
-            /* ' (' + fiat + '$' +
-                finalTotal.toFixed(2) + ') to:'); */
+          if ($("#paymentCode").is(':empty')) {
             $("#paymentTitle").empty();
             $("#paymentTitle").append('Please transfer <span class="success label finalTotal">₿' + finalTotalBCH.toFixed(8) + '</span> to:');
             $("#paymentCode").append(qrcode);
@@ -165,18 +169,21 @@
           toastr.error('No items to checkout');
         }
     });
+    /* end input */
 
+
+    /* start order summary */
     $("#orderCancel").click(function () {
-      $('#itemList').show();
-      $('#paymentSummary').hide();
-      $('#paymentCode').empty();
+      $("#itemList").show();
+      $("#paymentSummary").hide();
+      $("#paymentCode").empty();
     });
 
     $("#orderDone").click(function () {
       location.reload();
     });
 
-    $('.button').on('click', function (evt) {
+    $('.button').on("click", function (evt) {
     var buttonPressed = $(this).html();
     if (buttonPressed === "C") {
         result = 0;
@@ -193,14 +200,14 @@
     } else {
         currentEntry = '';
     }
-
     updateScreen(currentEntry);
     });
 
     $("#copyPaymentAddress").click(function () {
       copyToClipboard(document.getElementById("paymentAddress"));
-      toastr.success('Copied to clipboard')
+      toastr.success("Copied to clipboard")
     });
+    /* end order summary */
 });  
 </script>
 </head>
@@ -339,65 +346,76 @@
     </div>
     <!-- end totals -->
 
+        <!-- start settings -->
+        <div class="medium-6 large-6 columns text-center">
+          <div class="callout">
+            <h5><i class="fi-widget">&nbsp;</i>Settings</h5>
+          
+          <hr>
+    
+          <label>Recieve Addresses
+            <div id="myAddresses"></div>
+            <div class="input-group">
+              <span class="input-group-label">
+                <i class="fi-key"></i>
+              </span>
+              <input id="inputAddress" class="input-group-field" type="text" placeholder="Add recieve address">
+            </div>
+            <a class="hollow success button" id="addPaymentAddress"><i class="fi-plus"></i></a>
+          </label>
+          <hr>
+  
+          <label>Local Currency
+            <select>
+              <option selected="selected" value="AUD">AUD</option>
+                  <option value="BRL">BRL</option>
+                  <option value="CAD">CAD</option>
+                  <option value="CHF">CHF</option>
+                  <option value="CLP">CLP</option>
+                  <option value="CNY">CNY</option>
+                  <option value="CZK">CZK</option>
+                  <option value="DKK">DKK</option>
+                  <option value="EUR">EUR</option>
+                  <option value="GBP">GBP</option>
+                  <option value="HKD">HKD</option>
+                  <option value="HUF">HUF</option>
+                  <option value="IDR">IDR</option>
+                  <option value="ILS">ILS</option>
+                  <option value="INR">INR</option>
+                  <option value="JPY">JPY</option>
+                  <option value="KRW">KRW</option>
+                  <option value="MXN">MXN</option>
+                  <option value="MYR">MYR</option>
+                  <option value="NOK">NOK</option>
+                  <option value="NZD">NZD</option>
+                  <option value="PHP">PHP</option>
+                  <option value="PKR">PKR</option>
+                  <option value="PLN">PLN</option>
+                  <option value="USD">USD</option>
+                  <option value="RUB">RUB</option>
+                  <option value="SEK">SEK</option>
+                  <option value="SGD">SGD</option>
+                  <option value="THB">THB</option>
+                  <option value="TRY">TRY</option>
+                  <option value="TWD">TWD</option>
+                  <option value="ZAR">ZAR</option>
+            </select>
+          </label>   
+          <hr>
+
+          <a class="hollow warning button" id="cancelSettings"><i class="fi-prohibited"></i></a>
+          <a class="hollow success button" id="saveSettings"><i class="fi-check"></i></a>
+
+          </div>
+        </div>
+        <!-- end settings -->  
+
     <!-- start footer -->
     <div class="medium-12 large-12 columns text-center">
       
     </div>
     <!-- end footer --> 
 
-    <!-- start settings -->
-    <div class="medium-6 large-6 columns text-center">
-        <div class="callout">
-        <h5>Settings</h5>
-        <hr>
-  
-        <label>Recieve Addresses
-          <div id="myAddresses"></div>
-          <input type="text" id="inputAddress">
-          <a class="alert hollow button" id="addPaymentAddress">ADD</a>
-        </label>
-        <hr>
-
-        <label>Local Currency
-          <select>
-            <option selected="selected" value="AUD">AUD</option>
-                <option value="BRL">BRL</option>
-                <option value="CAD">CAD</option>
-                <option value="CHF">CHF</option>
-                <option value="CLP">CLP</option>
-                <option value="CNY">CNY</option>
-                <option value="CZK">CZK</option>
-                <option value="DKK">DKK</option>
-                <option value="EUR">EUR</option>
-                <option value="GBP">GBP</option>
-                <option value="HKD">HKD</option>
-                <option value="HUF">HUF</option>
-                <option value="IDR">IDR</option>
-                <option value="ILS">ILS</option>
-                <option value="INR">INR</option>
-                <option value="JPY">JPY</option>
-                <option value="KRW">KRW</option>
-                <option value="MXN">MXN</option>
-                <option value="MYR">MYR</option>
-                <option value="NOK">NOK</option>
-                <option value="NZD">NZD</option>
-                <option value="PHP">PHP</option>
-                <option value="PKR">PKR</option>
-                <option value="PLN">PLN</option>
-                <option value="USD">USD</option>
-                <option value="RUB">RUB</option>
-                <option value="SEK">SEK</option>
-                <option value="SGD">SGD</option>
-                <option value="THB">THB</option>
-                <option value="TRY">TRY</option>
-                <option value="TWD">TWD</option>
-                <option value="ZAR">ZAR</option>
-          </select>
-        </label>   
-          
-        </div>
-      </div>
-      <!-- end settings -->  
 </body>
 
 </html>

@@ -1,3 +1,9 @@
+/********************************************************************
+    cheddr.js
+    v.0.0.5
+    github.com/stabwah/cheddrme
+********************************************************************/
+
 // 'url': 'https://api.coinbase.com/v2/exchange-rates?currency=BCH',
 // 'price_key': 'data.rates.{cur}',
 
@@ -26,7 +32,7 @@
 */
 
 function copyToClipboard(elem) {
-	  // create hidden text element, if it doesn't already exist
+    // create hidden text element, if it doesn't already exist
     var targetId = "_hiddenCopyText_";
     var isInput = elem.tagName === "INPUT" || elem.tagName === "TEXTAREA";
     var origSelectionStart, origSelectionEnd;
@@ -75,6 +81,7 @@ function copyToClipboard(elem) {
     return succeed;
 }
 
+// add thousands seperator to number
 function thousands (nStr) {
     nStr += '';
     var x = nStr.split('.');
@@ -87,16 +94,36 @@ function thousands (nStr) {
     return x1 + x2;
 }
 
-function updateCount() {
-    var items = $('tr[class=orderItem]').length;
-    $('#orderItem').text(items);
-}
+// get exchange rate
+getExchRate = function (fiat) {
+    $.get("https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/?convert=" + fiat)
+    .then( function (data, status) {
+    var dateVar = "2010-10-30";
+    var exchangeUpdated = new Date(dateVar);
+    var local = fiat.toString().toLowerCase();
+    currentExchangeRate = data[0]['price_' + local];    
+    if (currentExchangeRate > 0) {
+        toastr.info('1 BCH = ' + fiat + '$' + parseFloat(currentExchangeRate).toFixed(2));
+        transFee = parseFloat(transFeeBCH * currentExchangeRate);
+        transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
+        $("#transactionFee").text("Recommended transaction fee: ");
+        $("#transFeeRecommended").text(transFeeBits);
+        $("#transactionFeeFiat").text("$" + transFee.toFixed(4));
+    } else { 
+        toastr.error("Could not retrieve exchange rate");
+    } })
+    .fail( function() {
+        toastr.error("Could not retrieve exchange rate");
+    });
+};
 
+// update POS display
 updateScreen = function (displayValue) {
     var displayValue = displayValue.toString();
     $('#display').val(displayValue.substring(0, 10));
 };
 
+// alternating table row colours
 updateTable = function () {
     $('table').each(function() {
         $('tr:even',  this).addClass('primary');
@@ -104,6 +131,7 @@ updateTable = function () {
     });
 };
 
+// calculate totals
 updateTotals = function () {
     updateTable();
     var finalTotalBits = 0;
@@ -124,48 +152,27 @@ updateTotals = function () {
     $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
 };
 
+// check if address already exists in list
+dupeAddress = function (input) {
+    var newAdd = input;
+    var dupesExist = $("#myAddresses").find('.addedAddress').text();
+    if(dupesExist.length > 1) {
+        $(".addedAddress").each(function() {
+            testAdd = $(this).text();
+            if (newAdd === testAdd) {
+                console.log('exists:' + testAdd);
+                return 1;
+            } else {
+                console.log('no dupe!');
+                return 0;
+            }
+        });
+    } else {
+        return 0;
+    }
+};
+
+// is a variable a number?
 isNumber = function (value) {
     return !isNaN(value);
 };
-
-function tally (selector) {
-    $(selector).each(function () {
-        var total = 0,
-            column = $(this).siblings(selector).andSelf().index(this);
-        $(this).parents().prevUntil(':has(' + selector + ')').each(function () {
-            total += parseFloat($('td.orderPrice:eq(' + column + ')', this).html()) || 0;
-        })
-        $(this).html(total);
-    });
-}
-	
-/*
-
-    var sumTotal = 0;
-    var sumTotalBits = 0;
-    var $tblrows = $("#orderedItems tr");
-    $tblrows.each(function (index) {
-        var $tblrow = $(this);
-        var orderPriceBits = $tblrow.find("[name=orderPriceBits]").text();
-        var orderPrice = parseFloat($tblrow.find("[name=orderPrice]").text());
-        console.log("Price:" + orderPrice);
-        console.log("Price:" + orderPriceBits);
-        if (!isNaN(orderPrice)) {
-            $tblrow.find('.orderPrice').text(parseFloat(orderPrice));
-            $(".orderPrice").each(function () {
-                var stval = parseFloat($(this).text());
-                console.log("price:" + stval);
-                sumTotal += isNaN(stval) ? 0 : stval;
-            });
-        }
-        if (!isNaN(orderPriceBits)) {
-            $tblrow.find('.orderPriceBits').text(parseFloat(orderPriceBits));
-            var sumTotalBits = 0;
-            $(".orderPriceBits").each(function () {
-                var stval = parseFloat($(this).text());
-                console.log(stval);
-                sumTotalBits += isNaN(stval) ? 0 : stval;
-            });
-        }
-    })
-    */
