@@ -27,10 +27,12 @@
   -->
   
   <script type="text/javascript">
-  var paymentAddress = "bitcoincash:qp7zfgk6qfk0dkcf4rd40p7ergrw7fr72v6ed98y4f";
+  var paymentAddress = "";
+  // bitcoincash:qp7zfgk6qfk0dkcf4rd40p7ergrw7fr72v6ed98y4f";
   // legacy = "1CKQgK1f5ZiRwb7DJM7pKKDaJuzE3mTKt8"
 
   var fiat = "AUD";
+
   var currentExchangeRate = 0;
   var transFee = 0;
 
@@ -66,7 +68,8 @@
 
   $(document).ready(function () {
     $("#paymentSummary").hide();
-    $("#displayFiat").text(fiat);
+
+    updateFiatSymbol();  
     getExchRate(fiat); 
 
     var result = 0;
@@ -116,6 +119,7 @@
         }
 
         if (dupeAddress(cashaddr) === 0) {
+          paymentAddress = cashaddr;
           $("#myAddresses").append('<div><span class="addedAddress">' + cashaddr + '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash"></i></a></span></div>');
           toastr.success("Recieve address added");
         } else {
@@ -131,9 +135,12 @@
     });
 
     $("select").on("change", function() {
-      toastr.info(this.value);
       fiat = this.value;
       $("#displayFiat").text(fiat);
+      updateFiatSymbol();
+      resetOrderForm();
+      $("#displayFiat").text(fiat);
+      toastr.info("Switched currency to " + fiat);
       getExchRate(fiat);
     })
     /* end settings */
@@ -159,7 +166,7 @@
         subTotalBits = parseFloat(subTotalBCH * 1000000).toFixed(2);
         finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
 
-        $("#orderedItems").append('<tr class="orderItem"><td><a href="#" class="deleteRow"><i class="fi-trash"></i></a></td><td class="orderPriceFiat">$' + itemPrice + '</td><td class="orderPriceBits">' + thousands(itemPriceBits) + '</td></tr>');
+        $("#orderedItems").append('<tr class="orderItem"><td><a href="#" class="deleteRow"><i class="fi-trash"></i></a></td><td class="orderPriceFiat">' + fiatSymbol + ' ' + itemPrice + '</td><td class="orderPriceBits">' + thousands(itemPriceBits) + '</td></tr>');
         $("#itemList").scrollTop($("#itemList")[0].scrollHeight);
 
         updateTotals();
@@ -208,17 +215,12 @@
     });
 
     $("#orderDone").click(function () {
-      location.reload();
+      resetOrderForm();
     });
 
     $('.button').on("click", function (evt) {
     var buttonPressed = $(this).html();
-    if (buttonPressed === "C") {
-        result = 0;
-        currentEntry = '0';
-    } else if (buttonPressed === "back") {
-        //currentEntry = currentEntry.substring(0, currentEntry.length-1);
-    } else if (buttonPressed === "+/-") {
+    if (buttonPressed === "+") {
         currentEntry *= -1;
     } else if (buttonPressed === '.') {
         currentEntry += '.';
@@ -250,7 +252,7 @@
       <hr>
       <div class="large-12 medium-12 columns">
         <div class="input-group">
-          <span class="input-group-label">$</span>
+          <span id="fiatSymbol" class="input-group-label"></span>
           <input class="input-group-field" type="text" id="display">
         </div>
       </div>
@@ -374,69 +376,69 @@
     </div>
     <!-- end totals -->
 
-        <!-- start settings -->
-        <div class="medium-6 large-6 columns text-center">
-          <div class="callout">
-            <h5><i class="fi-widget">&nbsp;</i>Settings</h5>
-          
-          <hr>
-    
-          <label>Recieve Addresses
-            <div id="myAddresses"></div>
-            <div class="input-group">
-              <span class="input-group-label">
-                <i class="fi-key"></i>
-              </span>
-              <input id="inputAddress" class="input-group-field" type="text" placeholder="Add recieve address">
-            </div>
-            <a class="hollow success button" id="addPaymentAddress"><i class="fi-plus"></i></a>
-          </label>
-          <hr>
-  
-          <label>Local Currency
-            <select>
-              <option selected="selected" value="AUD">AUD</option>
-                  <option value="BRL">BRL</option>
-                  <option value="CAD">CAD</option>
-                  <option value="CHF">CHF</option>
-                  <option value="CLP">CLP</option>
-                  <option value="CNY">CNY</option>
-                  <option value="CZK">CZK</option>
-                  <option value="DKK">DKK</option>
-                  <option value="EUR">EUR</option>
-                  <option value="GBP">GBP</option>
-                  <option value="HKD">HKD</option>
-                  <option value="HUF">HUF</option>
-                  <option value="IDR">IDR</option>
-                  <option value="ILS">ILS</option>
-                  <option value="INR">INR</option>
-                  <option value="JPY">JPY</option>
-                  <option value="KRW">KRW</option>
-                  <option value="MXN">MXN</option>
-                  <option value="MYR">MYR</option>
-                  <option value="NOK">NOK</option>
-                  <option value="NZD">NZD</option>
-                  <option value="PHP">PHP</option>
-                  <option value="PKR">PKR</option>
-                  <option value="PLN">PLN</option>
-                  <option value="USD">USD</option>
-                  <option value="RUB">RUB</option>
-                  <option value="SEK">SEK</option>
-                  <option value="SGD">SGD</option>
-                  <option value="THB">THB</option>
-                  <option value="TRY">TRY</option>
-                  <option value="TWD">TWD</option>
-                  <option value="ZAR">ZAR</option>
-            </select>
-          </label>   
-          <hr>
+    <!-- start settings -->
+    <div class="medium-6 large-6 columns text-center">
+      <div class="callout">
+        <h5><i class="fi-widget">&nbsp;</i>Settings</h5>
+      
+      <hr>
 
-          <a class="hollow warning button" id="cancelSettings"><i class="fi-prohibited"></i></a>
-          <a class="hollow success button" id="saveSettings"><i class="fi-check"></i></a>
-
-          </div>
+      <label><h4>Recieve Addresses</h4>
+        <div id="myAddresses" class="myAddresses"></div>
+        <div class="input-group">
+          <span class="input-group-label">
+            <i class="fi-key"></i>
+          </span>
+          <input id="inputAddress" class="input-group-field" type="text" placeholder="Add recieve address">
         </div>
-        <!-- end settings -->  
+        <a class="hollow success button" id="addPaymentAddress"><i class="fi-plus"></i></a>
+      </label>
+      <hr>
+
+      <label><h4>Local Currency</h4>
+        <select>
+          <option selected="selected" value="AUD">AUD</option>
+              <option value="BRL">BRL</option>
+              <option value="CAD">CAD</option>
+              <option value="CHF">CHF</option>
+              <option value="CLP">CLP</option>
+              <option value="CNY">CNY</option>
+              <option value="CZK">CZK</option>
+              <option value="DKK">DKK</option>
+              <option value="EUR">EUR</option>
+              <option value="GBP">GBP</option>
+              <option value="HKD">HKD</option>
+              <option value="HUF">HUF</option>
+              <option value="IDR">IDR</option>
+              <option value="ILS">ILS</option>
+              <option value="INR">INR</option>
+              <option value="JPY">JPY</option>
+              <option value="KRW">KRW</option>
+              <option value="MXN">MXN</option>
+              <option value="MYR">MYR</option>
+              <option value="NOK">NOK</option>
+              <option value="NZD">NZD</option>
+              <option value="PHP">PHP</option>
+              <option value="PKR">PKR</option>
+              <option value="PLN">PLN</option>
+              <option value="USD">USD</option>
+              <option value="RUB">RUB</option>
+              <option value="SEK">SEK</option>
+              <option value="SGD">SGD</option>
+              <option value="THB">THB</option>
+              <option value="TRY">TRY</option>
+              <option value="TWD">TWD</option>
+              <option value="ZAR">ZAR</option>
+        </select>
+      </label>   
+      <hr>
+
+      <a class="hollow warning button" id="cancelSettings"><i class="fi-prohibited"></i></a>
+      <a class="hollow success button" id="saveSettings"><i class="fi-check"></i></a>
+
+      </div>
+    </div>
+    <!-- end settings -->  
 
     <!-- start footer -->
     <div class="medium-12 large-12 columns text-center">

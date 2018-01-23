@@ -12,6 +12,12 @@ th {
   text-align: center;
 }
 
+.myAddresses {
+  color: #8DC451; 
+  letter-spacing: 0pt;
+  font-size: 1.2em;
+  word-wrap: break-word;
+}
 .inputAddress {
   width: 10em;  
 }

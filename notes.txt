@@ -1,31 +1,23 @@
 BCH API: https://bch.btc.com/api-doc
 
----
+TODO:
+    rotate recieve addresses
+    calculate transaction fee 
+    check blockchain for unconfirmed transaction (eg: https://github.com/simon-v/minipos/blob/master/minipos)
+    - Get the address balance (confirmed|unconfirmed)
+    
+# API check if a payment was received
+def check_payment(parameters):
+	amount = float(config['lock'][address]['amount'])
+	initial = float(config['lock'][address]['balance'])
+    ### Check address balance ###
+	balance, unconfirmed = bch.get_balance(address, config=config, verify=True)
 
-Convert to cashaddr:
-https://github.com/cashaddress/cashaddress.github.io/blob/master/main.js
+	if balance + unconfirmed >= initial + amount: ### ### ###
+		record_payment(address)
+		unlock_address(address)
+		return '1'
+return '0'
 
 
-
-
----
-
-https://bitcoincashjs.github.io/#Examples
-
-https://github.com/bitcoincashorg/spec/blob/master/cashaddr.md
-
-https://github.com/cashaddress/cashaddress.github.io
-
-https://cashaddress.github.io/
-
----
-
-FROM https://codepen.io/ccalbaugh/pen/GorbJx
-
-var array = [];
-$('.myList li').each(function(i, li) {
-  array.push($(li));
-});
-
----
-
+Supported Currencies: BRL, CAD, CHF, CLP, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PKR, PLN, USD, RUB, SEK, SGD, THB, TRY, TWD, ZAR

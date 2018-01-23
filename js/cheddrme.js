@@ -9,6 +9,13 @@
 
 /* from https://github.com/simon-v/minipos/blob/master/bch.py
 
+'url': 'https://blockdozer.com/insight-api/addr/bitcoincash:{address}',
+		'balance_key': 'balance',
+		'confirmed_key': None,
+		'unconfirmed_key': 'unconfirmedBalance',
+		'unit_satoshi': False,
+        'prefixes': 'qp',
+
 'url': 'https://cashexplorer.bitcoin.com/api/addr/{address}',
     'balance_key': 'balance',
     'confirmed_key': None,
@@ -30,6 +37,43 @@
     'unit_satoshi': False,
     'prefixes': '13',
 */
+
+function updateFiatSymbol() {
+    var currency_symbols = {
+        'AUD': '$', 
+        'USD': '$', 
+        'EUR': '€', 
+        'CRC': '₡', // Costa Rican Colón
+        'GBP': '£', 
+        'ILS': '₪', // Israeli New Sheqel
+        'INR': '₹', // Indian Rupee
+        'JPY': '¥', // Japanese Yen
+        'KRW': '₩', // South Korean Won
+        'NGN': '₦', // Nigerian Naira
+        'PHP': '₱', // Philippine Peso
+        'PLN': 'zł', // Polish Zloty
+        'PYG': '₲', // Paraguayan Guarani
+        'THB': '฿', // Thai Baht
+        'UAH': '₴', // Ukrainian Hryvnia
+        'VND': '₫', // Vietnamese Dong
+    };
+
+    if (currency_symbols[fiat] !== undefined) {
+        fiatSymbol = currency_symbols[fiat];
+    } else {
+        fiatSymbol = "$";
+    }    
+    $("#displayFiat").text(fiat);
+    $("#fiatSymbol").text(fiatSymbol);
+}
+
+function resetOrderForm() {
+    $("#paymentSummary").hide();
+    $("#orderedItems").find("tr").remove();
+    $("#paymentCode").empty();
+    $("#itemList").show();
+    updateTotals();
+}
 
 function copyToClipboard(elem) {
     // create hidden text element, if it doesn't already exist
@@ -103,12 +147,12 @@ getExchRate = function (fiat) {
     var local = fiat.toString().toLowerCase();
     currentExchangeRate = data[0]['price_' + local];    
     if (currentExchangeRate > 0) {
-        toastr.info('1 BCH = ' + fiat + '$' + parseFloat(currentExchangeRate).toFixed(2));
+        toastr.info('1 BCH = ' + fiatSymbol + parseFloat(currentExchangeRate).toFixed(2));
         transFee = parseFloat(transFeeBCH * currentExchangeRate);
         transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
         $("#transactionFee").text("Recommended transaction fee: ");
         $("#transFeeRecommended").text(transFeeBits);
-        $("#transactionFeeFiat").text("$" + transFee.toFixed(4));
+        $("#transactionFeeFiat").text(fiatSymbol + transFee.toFixed(4));
     } else { 
         toastr.error("Could not retrieve exchange rate");
     } })
@@ -143,10 +187,10 @@ updateTotals = function () {
 
     var finalTotalFiat = 0;
     $(".orderPriceFiat").each(function() {
-        orderPriceText = $(this).text().replace('$', '');
+        orderPriceText = $(this).text().replace(fiatSymbol, '');
         finalTotalFiat += parseFloat(orderPriceText);
     });
-    $("#orderTotalFiat").text('$' + finalTotalFiat.toFixed(2));
+    $("#orderTotalFiat").text(fiatSymbol + finalTotalFiat.toFixed(2));
 
     finalTotalBCH = finalTotalBits / 1000000;
     $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
@@ -170,6 +214,13 @@ dupeAddress = function (input) {
     } else {
         return 0;
     }
+};
+
+// Retrieve list of recieve addresses (so we can rotate later)
+getAddressList = function() {
+    $(".addedAddress").each(function() {
+        testAdd = $(this).text();
+    });
 };
 
 // is a variable a number?
