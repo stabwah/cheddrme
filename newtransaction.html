@@ -10,13 +10,11 @@
   <link rel="stylesheet" href="css/foundation.css" />
   <link rel="stylesheet" href="css/foundation-icons.css" />
   <link rel="stylesheet" href="css/toastr.min.css"/>
-  <script type="text/javascript" src="js/vendor/jquery.js"></script>  
+  <script type="text/javascript" src="js/jquery.js"></script>  
   <script type="text/javascript" src="js/foundation.min.js"></script>
   <script type="text/javascript" src="js/toastr.min.js"></script>
   <script type="text/javascript" src="js/kjua-0.1.1.min.js"></script>
-  <script type="text/javascript" src="js/wallet-address-validator.min.js"></script>
-  <script type="text/javascript" src="js/sha256.min.js"></script>
-  <script type="text/javascript" src="js/cashaddr.js"></script>
+  <script type="text/javascript" src="js/bchaddrjs-0.1.4.js"></script>
   <script type="text/javascript" src="js/cheddrme.js"></script>
 
   <!--
@@ -79,21 +77,51 @@
 
     /* start settings */
     $("#addPaymentAddress").click(function () {
+      var Format = bchaddr.Format;
+      var Network = bchaddr.Network;
+      var Type = bchaddr.Type;
+      var isLegacyAddress = bchaddr.isLegacyAddress;
+      var isBitpayAddress = bchaddr.isBitpayAddress;
+      var isCashAddress = bchaddr.isCashAddress;
+      var toCashAddress = bchaddr.toCashAddress;
+
       var newAddress = $("#inputAddress").val();
-      var valid = WAValidator.validate(newAddress, "BCH");
-      if(valid) {
-          if (dupeAddress(newAddress) === 0) {
-            toastr.success("Converting Legacy Address...");
-            var cashaddr = parseAndConvertOldAddress(newAddress);
-            console.log(cashaddr);
-            toastr.info("Recieve address added");
-            $("#myAddresses").append('<div><span><a href="#" class="removeAddress"><i class="fi-trash"></i></a></span>&nbsp;<span class="addedAddress">' + cashaddr + '</span></div>');
-          } else {
-            toastr.error("This address already exists");
-          }
-      } else {
-          toastr.warning("Invalid address");
+      if (newAddress.substring(0,12) === "bitcoincash:") {
+              newAddress = newAddress.replace("bitcoincash:",'');
       }
+      var validAddress = 0;
+
+      try {
+        if (isLegacyAddress(newAddress)) {
+            validAddress = 1;
+            toastr.warning("Converting Legacy addresss...");
+        } 
+        if (isBitpayAddress(newAddress)) {
+            validAddress = 1;
+            toastr.warning("Converting BitPay addresss...");
+        } 
+        if (isCashAddress(newAddress)) {
+            validAddress = 1;
+        }
+      }
+      catch (e) {
+              toastr.error("Invalid address");
+      }
+
+      if(validAddress === 1) {
+        var cashaddr = toCashAddress(newAddress);
+        // add bitcoincash: prefix if not found
+        if (cashaddr.substring(0,11) != "bitcoincash:") {
+          cashaddr = 'bitcoincash:' + cashaddr;
+        }
+
+        if (dupeAddress(cashaddr) === 0) {
+          $("#myAddresses").append('<div><span class="addedAddress">' + cashaddr + '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash"></i></a></span></div>');
+          toastr.success("Recieve address added");
+        } else {
+          toastr.error("This address already exists");
+        }
+      } 
     });
 
     $(document).on("click","a.removeAddress", function() {
