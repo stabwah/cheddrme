@@ -4,6 +4,9 @@ Cheddr is a Bitcoin Cash Point Of Sale system that runs in most modern browsers 
 
 To be lightning fast, we accept zero-confirmation transactions.
 
+Supported Currencies: 
+> BRL, CAD, CHF, CLP, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PKR, PLN, USD, RUB, SEK, SGD, THB, TRY, TWD, ZAR
+
 # Safety Concerns
 
 - Bitcoin Cash 0-conf is 200% faster than Visa 
