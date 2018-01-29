@@ -3,9 +3,9 @@
     v.0.0.5
     github.com/stabwah/cheddrme
 ********************************************************************/
-
 // 'url': 'https://api.coinbase.com/v2/exchange-rates?currency=BCH',
 // 'price_key': 'data.rates.{cur}',
+
 
 /* from https://github.com/simon-v/minipos/blob/master/bch.py
 
@@ -37,6 +37,113 @@
     'unit_satoshi': False,
     'prefixes': '13',
 */
+var exchangeUpdated = null;
+
+var initialBalance = 0;
+var initialBalanceSat = 0;
+var initialUnBalance = 0;
+var initialUnBalanceSat = 0;
+var initialTxArrivals = 0;
+var initialTotal = 0;
+
+var currentBalance = 0;
+var currentBalanceSat = 0;
+var currentUnBalance = 0;
+var currentUnBalanceSat = 0;
+var currentTxArrivals = 0;
+
+var initialTotal = 0;
+var currentTotal = 0;
+var expectedTotal = 0;
+var transactionTotal = 0;
+
+toastr.options = {
+    "closeButton": true,
+    "debug": false,
+    "newestOnTop": false,
+    "progressBar": false,
+    "positionClass": "toast-top-left",
+    "preventDuplicates": true,
+    "onclick": null,
+    "showDuration": "300",
+    "hideDuration": "1000",
+    "timeOut": "3000",
+    "extendedTimeOut": "1000",
+    "showEasing": "swing",
+    "hideEasing": "linear",
+    "showMethod": "fadeIn",
+    "hideMethod": "fadeOut"
+};
+
+function showSplash() {
+    $("#storeSplash").show();
+    updateSplashClock();
+    updateFiatSymbol();  
+    getExchRate(fiat); 
+
+    $("#settingsModal").hide();
+    resetOrderForm();
+    $("#mainForm").hide();
+    $("#menubar").hide();
+    $(".circle-loader").hide();
+}
+
+function showMain() {
+    $("#mainForm").show();
+    $("#menubar").show();
+    $(".circle-loader").hide();
+    $("#storeSplash").hide();
+    $("#settingsModal").hide(); 
+    updateScreen(0);
+    resetOrderForm();
+}
+
+function showSettings() {
+    $("#storeSplash").hide();
+    $("#settingsModal").show();
+
+    var checkSaved = localStorage.getItem("cheddrAddress");
+    if (checkSaved != null) {
+      // found saved address
+      $("#myAddresses").empty();
+      $("#myAddresses").append('<div><span class="addedAddress">' + checkSaved +
+              '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>');
+    } 
+
+    $("#mainForm").hide();
+    $("#menubar").hide();
+}
+
+function resetOrderForm() {
+    $("#paymentSummary").hide();
+    $("#orderedItems").find("tr").remove();
+    $("#paymentCode").empty();
+    $("#itemList").show();
+    updateTotals();
+}
+
+updateSplashClock = function () {
+    var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]; 
+    var dayNames= ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+    var newDate = new Date();
+    var minutes = new Date().getMinutes();
+    var hours = new Date().getHours();
+  
+    newDate.setDate(newDate.getDate());
+  
+    // update display on load
+    $('#clockDisplayDate').html(dayNames[newDate.getDay()] + " " + newDate.getDate() + ' ' + monthNames[newDate.getMonth()] + ' ' + newDate.getFullYear());
+    $("#clockDisplayM").html(( minutes < 10 ? "0" : "" ) + minutes);
+    $("#clockDisplayH").html(( hours < 10 ? "0" : "" ) + hours);
+    
+    setInterval( function() {
+      hours = new Date().getHours();
+      minutes = new Date().getMinutes();  
+      // Add leading zero
+      $("#clockDisplayH").html(( hours < 10 ? "0" : "" ) + hours);
+      $("#clockDisplayM").html(( minutes < 10 ? "0" : "" ) + minutes);
+    }, 10000);	
+  }; 
 
 function updateFiatSymbol() {
     var currency_symbols = {
@@ -65,14 +172,6 @@ function updateFiatSymbol() {
     }    
     $("#displayFiat").text(fiat);
     $("#fiatSymbol").text(fiatSymbol);
-}
-
-function resetOrderForm() {
-    $("#paymentSummary").hide();
-    $("#orderedItems").find("tr").remove();
-    $("#paymentCode").empty();
-    $("#itemList").show();
-    updateTotals();
 }
 
 function copyToClipboard(elem) {
@@ -138,33 +237,138 @@ function thousands (nStr) {
     return x1 + x2;
 }
 
+function diff_minutes(dt2, dt1) {
+  var diff=(dt2.getTime() - dt1.getTime()) / 1000;
+  diff /= 60;
+  return Math.abs(Math.round(diff));
+}
+
 // get exchange rate
 getExchRate = function (fiat) {
-    $.get("https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/?convert=" + fiat)
-    .then( function (data, status) {
-    var dateVar = "2010-10-30";
-    var exchangeUpdated = new Date(dateVar);
-    var local = fiat.toString().toLowerCase();
-    currentExchangeRate = data[0]['price_' + local];    
-    if (currentExchangeRate > 0) {
-        toastr.info('1 BCH = ' + fiatSymbol + parseFloat(currentExchangeRate).toFixed(2));
-        transFee = parseFloat(transFeeBCH * currentExchangeRate);
-        transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
-        $("#transactionFee").text("Recommended transaction fee: ");
-        $("#transFeeRecommended").text(transFeeBits);
-        $("#transactionFeeFiat").text(fiatSymbol + transFee.toFixed(4));
-    } else { 
-        toastr.error("Could not retrieve exchange rate");
-    } })
+    var url = "https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/?convert=" + fiat; 
+    
+    if (exchangeUpdated != null) {
+        var timeNow = new Date($.now());
+        var rateLimit = diff_minutes(exchangeUpdated, timeNow);
+    }
+    
+    if (rateLimit > 5 || exchangeUpdated === null) {
+        exchangeUpdated = new Date($.now());
+        $.get(url)
+        .success( function (data, status) {
+            var local = fiat.toString().toLowerCase();
+            currentExchangeRate = data[0]['price_' + local];    
+            if (currentExchangeRate > 0) {
+                toastr.success('1 BCH = ' + fiatSymbol + parseFloat(currentExchangeRate).toFixed(2));
+
+                var splashUpdate = fiatSymbol + parseFloat(currentExchangeRate).toFixed(2) + '<br/>' + fiat + ' / BCH';
+                $("#splashRate").empty();
+                $("#splashRate").append(splashUpdate);
+                $("#splashStatus").text('Updated: ' + exchangeUpdated.toLocaleString());
+
+                transFee = parseFloat(transFeeBCH * currentExchangeRate);
+                transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
+                $("#transactionFee").text("Recommended transaction fee: ");
+                $("#transFeeRecommended").text(transFeeBits);
+                $("#transactionFeeFiat").text(fiatSymbol + transFee.toFixed(4));
+            } else { 
+                toastr.error("Could not retrieve exchange rate");
+            }
+        })
+        .fail( function() {
+            toastr.error("Could not retrieve exchange rate");
+        });
+    } 
+};
+
+// get wallet details
+getInitials = function () {
+    var url =  "https://blockdozer.com/insight-api/addr/" + paymentAddress;
+
+    $.get(url)
+    .success( function(inData) {
+          var intialUpdated = new Date($.now());
+  
+          initialBalance = inData["balance"];
+          initialBalanceSat = inData["balanceSat"];
+          initialUnBalance = inData["unconfirmedBalance"]; // totalReceived
+          initialUnBalanceSat = inData["unconfirmedBalanceSat"]; 
+          initialTxArrivals = inData["unconfirmedTxApperances"];
+          initialTotal = initialBalance + initialUnBalance;
+          console.log("in::" + initialTotal);
+        }, "json" )
     .fail( function() {
-        toastr.error("Could not retrieve exchange rate");
+        toastr.error("Couldn't retrieve transaction details");
+    });
+};
+
+// check transaction
+checkTransaction = function (orderTotalBCH) {
+    var url = "https://blockdozer.com/insight-api/addr/" + paymentAddress;
+
+    $.get(url)
+    .success( function(chkData) {
+        var transactionStart = new Date($.now());
+
+        currentBalance = chkData["balance"];
+        currentBalanceSat = chkData["balanceSat"];
+        currentUnBalance = chkData["unconfirmedBalance"];
+        currentUnBalanceSat = chkData["unconfirmedBalanceSat"];
+        currentTxArrivals = chkData["unconfirmedTxApperances"];
+
+        currentTotal = parseFloat(currentBalance + currentUnBalance);
+        expectedTotal = parseFloat(initialBalance + orderTotalBCH);
+
+        if (currentTotal >= expectedTotal) {
+            $(".circle-loader").toggleClass("load-complete");
+            $(".checkmark").toggle();      
+            toastr.success("Payment recieved!");
+            showSplash();
+            clearInterval(intervalTransCheck);
+            // showReciept()
+            // record_payment(address)
+            // unlock_address(address)
+        } else {
+            console.log("curr::" + currentTotal);
+            console.log("ex::" + expectedTotal);
+        }
+    }, "json")
+    .fail( function() {
+        toastr.error("Couldn't retrieve transaction details");
     });
 };
 
 // update POS display
 updateScreen = function (displayValue) {
-    var displayValue = displayValue.toString();
-    $('#display').val(displayValue.substring(0, 10));
+    var display = displayValue.toString();
+    currentEntry = display;
+    $("#mainDisplay").val(display.substring(0, 10));
+};
+
+addItemToOrder = function() {
+    var itemPrice = parseFloat($("#mainDisplay").val()).toFixed(2);
+    var itemPriceBCH = 0;
+    if (itemPrice > 0) {       
+        subTotal = parseFloat(subTotal) + parseFloat(itemPrice);
+        finalTotal = parseFloat(subTotal);
+
+        itemPriceBCH = (parseFloat(itemPrice) / parseFloat(currentExchangeRate)).toFixed(10);
+        subTotalBCH = parseFloat(subTotalBCH) + parseFloat(itemPriceBCH);
+        finalTotalBCH = parseFloat(subTotalBCH);
+
+        itemPriceBits = parseFloat(itemPriceBCH * 1000000).toFixed(2);
+        subTotalBits = parseFloat(subTotalBCH * 1000000).toFixed(2);
+        finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
+
+        $("#orderedItems").append(
+        '<tr class="orderItem"><td><a href="#" class="deleteRow"><i class="fi-trash"></i></a></td><td class="orderPriceFiat">' +
+        fiatSymbol + ' ' + itemPrice + '</td><td class="orderPriceBits">' + thousands(itemPriceBits) +
+        '</td></tr>');
+        $("#itemList").scrollTop($("#itemList")[0].scrollHeight);
+
+        updateTotals();
+        updateScreen(0);
+    }
 };
 
 // alternating table row colours
