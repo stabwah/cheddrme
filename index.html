@@ -234,8 +234,9 @@
         if (finalTotal > 0) {
           $("#paymentSummary").show();
           $("#itemList").hide();
+          var specificAmount = paymentAddress + '?amount=' + parseFloat(finalTotalBCH).toFixed(8);
           var qrcode = kjua({
-            text: paymentAddress,
+            text: specificAmount,
             ecLevel: 'H',
             size: 177,
             rounded: 100,
@@ -247,7 +248,7 @@
           if ($("#paymentCode").is(':empty')) {
             $("#paymentTitle").empty();
             $("#paymentTitle").append('Please transfer <span class="success label finalTotal">₿' +
-              finalTotalBCH.toFixed(8) + '</span> to:');
+              parseFloat(finalTotalBCH).toFixed(8) + '</span> to:');
             $("#paymentCode").append(qrcode);
             $("#paymentAddress").val(paymentAddress);
             getInitials();
