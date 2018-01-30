@@ -72,9 +72,7 @@ function showSplash() {
     updateSplashClock();
     updateFiatSymbol();  
     getExchRate(fiat); 
-    var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
-    $("#blockchainExplorerLink").prop("href", blockExplorerUrl);
-
+    
     $("#settingsModal").hide();
     resetOrderForm();
     $("#mainForm").hide();

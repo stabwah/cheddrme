@@ -66,6 +66,8 @@
         if (checkStore != null) {
           $("#inputStoreName").text(checkStore);
           $("#splashStoreName").text(checkStore);
+          var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
+          $("#blockchainExplorerLink").attr("href", blockExplorerUrl);
         }
         showSplash();
       } else {
@@ -115,7 +117,8 @@
             $("#splashStoreName").text(storeName);
             localStorage.setItem("cheddrStoreName",storeName);
           }
-
+          var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
+          $("#blockchainExplorerLink").attr("href", blockExplorerUrl);
           showSplash();
         } else {
           toastr.error("No addresses added")
