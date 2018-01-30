@@ -1,20 +1,17 @@
 /********************************************************************
     cheddr.js
-    v.0.0.5
+    v.0.1.1
     github.com/stabwah/cheddrme
 ********************************************************************/
+
+/* 
+BCH API: https://bch.btc.com/api-doc
+
+maybe one day
+taken from https://github.com/simon-v/minipos/blob/master/bch.py
+
 // 'url': 'https://api.coinbase.com/v2/exchange-rates?currency=BCH',
 // 'price_key': 'data.rates.{cur}',
-
-
-/* from https://github.com/simon-v/minipos/blob/master/bch.py
-
-'url': 'https://blockdozer.com/insight-api/addr/bitcoincash:{address}',
-		'balance_key': 'balance',
-		'confirmed_key': None,
-		'unconfirmed_key': 'unconfirmedBalance',
-		'unit_satoshi': False,
-        'prefixes': 'qp',
 
 'url': 'https://cashexplorer.bitcoin.com/api/addr/{address}',
     'balance_key': 'balance',
@@ -29,13 +26,6 @@
     'unconfirmed_key': 'unconfirmedBalance',
     'unit_satoshi': False,
     'prefixes': 'CH',
-
-'url': 'https://bch-bitcore2.trezor.io/api/addr/{address}',
-    'balance_key': 'balance',
-    'confirmed_key': None,
-    'unconfirmed_key': 'unconfirmedBalance',
-    'unit_satoshi': False,
-    'prefixes': '13',
 */
 var exchangeUpdated = null;
 
@@ -82,6 +72,8 @@ function showSplash() {
     updateSplashClock();
     updateFiatSymbol();  
     getExchRate(fiat); 
+    var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
+    $("#blockchainExplorerLink").prop("href", blockExplorerUrl);
 
     $("#settingsModal").hide();
     resetOrderForm();
@@ -343,12 +335,12 @@ checkTransaction = function (orderTotalBCH) {
             $("#splashStatus").text('Total: ₿ ' + totalToday);
             $("#splashStatusDate").empty();
             $("#splashStatusDate").append('Last Transaction:<br/>₿' + parseFloat(orderTotalBCH).toFixed(8) + '<br/>' + transactionStart.toLocaleTimeString());
-
+            
             setTimeout(
                 function() 
                 {
                     showSplash();
-                }, 1500);
+                }, 950);
             // showReciept()
             // record_payment(address)
             // unlock_address(address)
