@@ -305,7 +305,7 @@ getInitials = function () {
           initialUnBalance = inData["unconfirmedBalance"]; // totalReceived
           initialUnBalanceSat = inData["unconfirmedBalanceSat"]; 
           initialTxArrivals = inData["unconfirmedTxApperances"];
-          initialTotal = initialBalance + initialUnBalance;
+          initialTotal = parseFloat(initialBalance + initialUnBalance).toFixed(8);
           console.log("initial:: " + initialTotal);
         }, "json" )
     .fail( function() {
@@ -327,8 +327,8 @@ checkTransaction = function (orderTotalBCH) {
         currentUnBalanceSat = chkData["unconfirmedBalanceSat"];
         currentTxArrivals = chkData["unconfirmedTxApperances"];
 
-        currentTotal = parseFloat(currentBalance + currentUnBalance);
-        expectedTotal = parseFloat(initialBalance + orderTotalBCH);
+        currentTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
+        expectedTotal = parseFloat(initialBalance + orderTotalBCH).toFixed(8);
 
         if (currentTotal >= expectedTotal) {
             // stop checking api
