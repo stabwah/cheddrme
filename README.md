@@ -20,12 +20,13 @@ Bitcoin Cash intends to make zero-conf as safe and reliable as it used to be bef
 
 # Design Goals
 
-- No server-side infrastructure
-- No private keys used, stored or transmitted
-- Multiple fiat currencies supported
 - Simple to use
+- No server-side infrastructure
+- No private keys used (stored or transmitted)
+- Multiple fiat currencies supported
 
 # TODO
+
 - Retry API on failure
 - Fall back to multiple APIs
 - Calculate transaction fee

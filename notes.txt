@@ -1,0 +1,6 @@
+BCH API: https://bch.btc.com/api-doc
+
+TODO:
+    rotate recieve addresses
+    calculate transaction fee 
+	

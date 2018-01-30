@@ -57,6 +57,8 @@ var currentTotal = 0;
 var expectedTotal = 0;
 var transactionTotal = 0;
 
+var totalToday = 0;
+
 toastr.options = {
     "closeButton": true,
     "debug": false,
@@ -85,13 +87,11 @@ function showSplash() {
     resetOrderForm();
     $("#mainForm").hide();
     $("#menubar").hide();
-    $(".circle-loader").hide();
 }
 
 function showMain() {
     $("#mainForm").show();
     $("#menubar").show();
-    $(".circle-loader").hide();
     $("#storeSplash").hide();
     $("#settingsModal").hide(); 
     updateScreen(0);
@@ -110,12 +110,24 @@ function showSettings() {
               '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>');
     } 
 
+    var checkStore = localStorage.getItem("cheddrStoreName");
+    if (checkStore != null) {
+        $("#inputStoreName").text(checkStore);
+        $("#splashStoreName").text(checkStore);
+    }
+
     $("#mainForm").hide();
     $("#menubar").hide();
 }
 
 function resetOrderForm() {
     $("#paymentSummary").hide();
+    $("#summaryQrCode").show();
+    $("#summaryFeeRecommend").show();
+    $("#summaryWaiter").hide();
+    $("#summaryWaiterText").hide();
+    $("#orderCancel").show();
+    $("#orderDone").show();     
     $("#orderedItems").find("tr").remove();
     $("#paymentCode").empty();
     $("#itemList").show();
@@ -264,7 +276,6 @@ getExchRate = function (fiat) {
                 var splashUpdate = fiatSymbol + parseFloat(currentExchangeRate).toFixed(2) + '<br/>' + fiat + ' / BCH';
                 $("#splashRate").empty();
                 $("#splashRate").append(splashUpdate);
-                $("#splashStatus").text('Updated: ' + exchangeUpdated.toLocaleString());
 
                 transFee = parseFloat(transFeeBCH * currentExchangeRate);
                 transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
@@ -295,7 +306,7 @@ getInitials = function () {
           initialUnBalanceSat = inData["unconfirmedBalanceSat"]; 
           initialTxArrivals = inData["unconfirmedTxApperances"];
           initialTotal = initialBalance + initialUnBalance;
-          console.log("in::" + initialTotal);
+          console.log("initial:: " + initialTotal);
         }, "json" )
     .fail( function() {
         toastr.error("Couldn't retrieve transaction details");
@@ -320,17 +331,30 @@ checkTransaction = function (orderTotalBCH) {
         expectedTotal = parseFloat(initialBalance + orderTotalBCH);
 
         if (currentTotal >= expectedTotal) {
+            // stop checking api
+            clearInterval(intervalTransCheck);
+
+            totalToday += orderTotalBCH;
+
             $(".circle-loader").toggleClass("load-complete");
             $(".checkmark").toggle();      
             toastr.success("Payment recieved!");
-            showSplash();
-            clearInterval(intervalTransCheck);
+
+            $("#splashStatus").text('Total: ₿ ' + totalToday);
+            $("#splashStatusDate").empty();
+            $("#splashStatusDate").append('Last Transaction:<br/>₿' + parseFloat(orderTotalBCH).toFixed(8) + '<br/>' + transactionStart.toLocaleTimeString());
+
+            setTimeout(
+                function() 
+                {
+                    showSplash();
+                }, 1500);
             // showReciept()
             // record_payment(address)
             // unlock_address(address)
         } else {
-            console.log("curr::" + currentTotal);
-            console.log("ex::" + expectedTotal);
+            console.log("current:: " + currentTotal);
+            console.log("expected:: " + expectedTotal);
         }
     }, "json")
     .fail( function() {
@@ -408,10 +432,8 @@ dupeAddress = function (input) {
         $(".addedAddress").each(function() {
             testAdd = $(this).text();
             if (newAdd === testAdd) {
-                console.log('exists:' + testAdd);
                 return 1;
             } else {
-                console.log('no dupe!');
                 return 0;
             }
         });

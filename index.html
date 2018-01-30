@@ -11,8 +11,6 @@
   <link rel="stylesheet" href="css/foundation-icons.css" />
   <link rel="stylesheet" href="css/toastr.min.css" />
 
-  <link rel="stylesheet" href="css/checkmark.css">
-
   <script type="text/javascript" src="js/jquery.js"></script>
   <script type="text/javascript" src="js/foundation.min.js"></script>
   <script type="text/javascript" src="js/toastr.min.js"></script>
@@ -31,9 +29,6 @@
 
   <script type="text/javascript">
     var paymentAddress = "";
-    // bitcoincash:qp7zfgk6qfk0dkcf4rd40p7ergrw7fr72v6ed98y4f";
-    // legacy = "1CKQgK1f5ZiRwb7DJM7pKKDaJuzE3mTKt8"
-
     var fiat = "AUD";
 
     var currentExchangeRate = 0;
@@ -59,11 +54,19 @@
     $(document).ready(function () {
       var checkSaved = localStorage.getItem("cheddrAddress");
       var checkFiat = localStorage.getItem("cheddrFiat");
-      var checkStore = localStorage.getItem("cheddrStore");
+      var checkStore = localStorage.getItem("cheddrStoreName");
+
+      if (checkFiat != null) {
+        fiat = checkFiat;
+      }
 
       if (checkSaved != null) {
         // found saved address, skip setup
         paymentAddress = checkSaved;
+        if (checkStore != null) {
+          $("#inputStoreName").text(checkStore);
+          $("#splashStoreName").text(checkStore);
+        }
         showSplash();
       } else {
         // first-timer
@@ -107,8 +110,11 @@
             localStorage.setItem("cheddrAddress",paymentAddress);
           });
 
-          // check for store name
-          // localStorage.setItem("cheddrStore",storeName);
+          var storeName = $("#inputStoreName").val();
+          if (storeName != null) {
+            $("#splashStoreName").text(storeName);
+            localStorage.setItem("cheddrStoreName",storeName);
+          }
 
           showSplash();
         } else {
@@ -228,7 +234,7 @@
           var qrcode = kjua({
             text: paymentAddress,
             ecLevel: 'H',
-            size: 256,
+            size: 177,
             rounded: 100,
             quiet: 0,
             mSize: 26,
@@ -257,17 +263,30 @@
 
       $("#orderDone").click(function () {
         var checkLoop = 0;
-        $(".circle-loader").show();
+        $("#summaryQrCode").hide();
+        $("#summaryFeeRecommend").hide();
+        $("#summaryWaiter").show();
+        $("#summaryWaiterText").show();
+
+        $("#orderCancel").hide();
+        $("#orderDone").hide();     
+
         intervalTransCheck = setInterval(function () { 
         checkTransaction(finalTotalBCH);
 
-        console.log(checkLoop);
-        if (++checkLoop === 10) {
+        console.log("retry:: " + checkLoop);
+        if (++checkLoop === 4) {
             toastr.warning("Could not confirm transaction")
             clearInterval(intervalTransCheck);
-            $(".circle-loader").hide();
+
+            $("#summaryWaiter").hide();
+            $("#summaryWaiterText").hide();
+            $("#summaryQrCode").show();
+            $("#summaryFeeRecommend").show();
+            $("#orderCancel").show();
+            $("#orderDone").show();     
         }
-        }, 2000);
+        }, 3000);
       });
 
       $("#copyPaymentAddress").click(function () {
@@ -306,11 +325,7 @@
         <p id="splashRate" class="splash">42</p>
       </div>
 
-      <div style="position:absolute;left:84%;top:2%;">
-        <a href="#" id="refreshCog"><i class="fi-refresh settings">&nbsp;</i></a>
-      </div>
-
-      <div style="position:absolute;left:92%;top:2%;">
+      <div style="position:absolute;left:90%;top:2%;">
         <a href="#" id="settingsCog"><i class="fi-widget settings">&nbsp;</i></a>
       </div>
 
@@ -330,10 +345,10 @@
           <img src="./images/bchlogo256.png" alt="Proudly Powered By Bitcoin Cash" />
         </div>
 
-        <p class="store-profile-name">KAM'S COFFEE</p>
-        <p class="store-profile-status" id="splashStatus"></p>
+        <p class="splashStoreName" id="splashStoreName"></p>
+        <p id="splashStatus"></p>
 
-        <p class="store-profile-info">Stack cheddars forever, live treacherous, all the et ceteras</p>
+        <p class="store-profile-info" id="splashStatusDate">Stack cheddars forever, live treacherous, all the et ceteras</p>
       </div>
 
       <div class="store-profile-actions">
@@ -414,11 +429,19 @@
           </div>
 
         </div>
-        <div>
+
+        <!-- loading check -->
+        <div id="summaryWaiter"><br/>
+            <div class="circle-loader">
+              <div class="checkmark draw"></div>
+            </div>
+          </div>
+          
+        <div id="summaryQrCode">
           <p>or scan QR Code:</p>
           <p id="paymentCode"></p>
         </div>
-        <div>
+        <div id="summaryFeeRecommend">
           <span id="transactionFee"></span>
           <span class="warning round radius label" id="transFeeRecommended"></span> bits per kilobyte
         </div>
@@ -430,13 +453,7 @@
           <a class="success large-2 button" id="orderDone">
             <i class="fi-check"></i>
           </a>
-        </div>
-
-        <!-- loading check -->
-        <div class="callout">
-          <div class="circle-loader">
-            <div class="checkmark draw"></div>
-          </div>
+          <div id="summaryWaiterText">Looking for transaction...<br/><br/></div>
         </div>
 
       </div>
