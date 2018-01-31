@@ -32,3 +32,9 @@ Bitcoin Cash intends to make zero-conf as safe and reliable as it used to be bef
 - Calculate transaction fee
 - History of transactions
 - Generate recieve addresses for user
+
+# Donations
+
+This system is being developed in my spare time, donations are gratefully accepted.
+
+bitcoincash:qze4dyv6znt5h22dxqsejvfn47tz2ermeg62y4cdg6
