@@ -8,6 +8,17 @@ body {
   padding: 0;
 }
 
+/* rotates anticlockwise by 30 degrees (fixes zurb's bitcoin icon to be bitcoin cash) */
+.gly-rotate-30 {
+  filter: progid: DXImageTransform.Microsoft.BasicImage(rotation=0.5);
+  -webkit-transform: rotate(-30deg);
+  -moz-transform: rotate(-30deg);
+  -ms-transform: rotate(-30deg);
+  -o-transform: rotate(-30deg);
+  transform: rotate(-30deg);
+  display: inline-block;
+}
+
 /* store splash */
 #clockDisplayDate {
   font-family: 'Raleway', sans-serif;
