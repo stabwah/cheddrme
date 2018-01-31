@@ -37,4 +37,5 @@ Bitcoin Cash intends to make zero-conf as safe and reliable as it used to be bef
 
 This system is being developed in my spare time, donations are gratefully accepted.
 
+![qrcode](https://i.imgur.com/A1i7tvW.png)
 bitcoincash:qze4dyv6znt5h22dxqsejvfn47tz2ermeg62y4cdg6
