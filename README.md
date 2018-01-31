@@ -6,17 +6,16 @@ To be lightning fast we accept zero-confirmation transactions (most payments com
 
 The online version is available at: https://pos.cheddr.cash/
 
-Supported Currencies: 
-> BRL, CAD, CHF, CLP, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PKR, PLN, USD, RUB, SEK, SGD, THB, TRY, TWD, ZAR
-
 # Features
 
-- Simple to use
+- Simple to use for you and your customers: QR codes generated with total amount 
 - Servers not required: runs entirely in your browser
 - No private keys: your private data is never stored or transmitted
 - cashaddr address format: legacy addresses are automatically converted for your safety and convenience
 - Multiple fiat currencies: exchange rate updated periodically
-- Settings saved using HTML5 local storage
+
+Supported Currencies: 
+> BRL, CAD, CHF, CLP, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PKR, PLN, USD, RUB, SEK, SGD, THB, TRY, TWD, ZAR
 
 # Safety Concerns
 
@@ -29,11 +28,25 @@ When compared to something like chargeback fraud, which can be done weeks after 
 
 Bitcoin Cash intends to make zero-conf as safe and reliable as it used to be before the backlogs. As transactions are virtually guanteed to be included in the next block, it is nearly impossible for fraud to occur. 
 
-# Usage
+# Notes
 
 Cheddr only currently supports one recieve address at a time however I never encountered issues as long as you aren't trying to use multiple tabs at once.
 
 For vendors requiring multiple checkouts, I recommend generating a unique recieve address for each point of sale location.
+
+Exchange rates are taken from api.coinmarketcap.com - the updates are limited to once every 5 minutes.
+
+Transactions are validated using blockdozer.com api which tries a maximum of 4 times with a 3 second delay between each attempt. 
+
+# Basic Usage
+
+For vendors that already have existing Point of Sale systems the quickest way to complete a Bitcoin Cash transaction is:
+
+1. Press New Transaction button from main screen
+2. Enter total amount using keypad
+3. Press the green check-out button (no need to press the add key)
+4. Show the customer the generated QR code (or copy the address for them to send to)
+5. Press the confirm payment button (green tick) to start validating the transaction
 
 # TODO
 
