@@ -28,7 +28,11 @@
   -->
 
   <script type="text/javascript">
+//     var jsonPayment = [];
+    var paymentURI = "";
     var paymentAddress = "";
+    var pyxpubServer = "";
+    var storeName = "";
     var fiat = "AUD";
 
     var currentExchangeRate = 0;
@@ -55,15 +59,22 @@
       var checkSaved = localStorage.getItem("cheddrAddress");
       var checkFiat = localStorage.getItem("cheddrFiat");
       var checkStore = localStorage.getItem("cheddrStoreName");
-
+      var checkServer = localStorage.getItem("pyxpubServer");
+      console.log("read pyxpub: " + checkServer);
+      console.log("read storename: " + checkStore);
+      
       if (checkFiat != null) {
         fiat = checkFiat;
       }
-
+      if (checkServer != null) {
+          pyxpubServer = checkServer
+          toastr.success("Pyxpub server loaded");
+      }
       if (checkSaved != null) {
         // found saved address, skip setup
         paymentAddress = checkSaved;
         if (checkStore != null) {
+          storeName = checkStore;
           $("#inputStoreName").text(checkStore);
           $("#splashStoreName").text(checkStore);
           var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
@@ -109,6 +120,16 @@
       });
 
       $("#saveSettings").click(function () {
+        var storeName = $("#inputStoreName").val();
+        if (storeName != null) {
+          $("#splashStoreName").text(storeName);
+          localStorage.setItem("cheddrStoreName",storeName);
+        }
+        var pyxpubServerName = $("#inputServerName").val();
+        if (pyxpubServerName != null) {
+          localStorage.setItem("pyxpubServer",pyxpubServerName);
+          toastr.success("Pyxpub server saved");
+        }
         // check recieve address has been added
         var newAddress = $("#inputAddress").val();
         localStorage.removeItem("cheddrAddress");
@@ -146,32 +167,28 @@
           }
 
           if (validAddress === 1) {
-              var cashaddr = toCashAddress(newAddress);
-              // add bitcoincash: prefix if not found
-              if (cashaddr.substring(0, 11) != "bitcoincash") {
-                  cashaddr = 'bitcoincash:' + cashaddr;
-              }
+            var cashaddr = toCashAddress(newAddress);
+            // add bitcoincash: prefix if not found
+            if (cashaddr.substring(0, 11) != "bitcoincash") {
+                cashaddr = 'bitcoincash:' + cashaddr;
+            }
 
-              if (paymentAddress != cashaddr) {
-                  paymentAddress = cashaddr;
-                  $("#inputAddress").val(cashaddr);
-                  localStorage.setItem("cheddrAddress",cashaddr);
-              /*
-                  '<div><span class="addedAddress">' +  +
-                  '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>'
-              );*/
-                  toastr.success("Recieve address added");
-              } else {
-                  toastr.error("This address already exists");
-              }
-              var storeName = $("#inputStoreName").val();
-              if (storeName != null) {
-                $("#splashStoreName").text(storeName);
-                localStorage.setItem("cheddrStoreName",storeName);
-              }
-              var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
-              $("#blockchainExplorerLink").attr("href", blockExplorerUrl);
-              showSplash();
+            if (paymentAddress != cashaddr) {
+                paymentAddress = cashaddr;
+                $("#inputAddress").val(cashaddr);
+                localStorage.setItem("cheddrAddress",cashaddr);
+            /*
+                '<div><span class="addedAddress">' +  +
+                '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>'
+            );*/
+                toastr.success("Recieve address added");
+            } else {
+                toastr.error("This address already exists");
+            }
+            
+            var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
+            $("#blockchainExplorerLink").attr("href", blockExplorerUrl);
+            showSplash();
           }
         } else {
           toastr.error("No recieve address")
@@ -234,27 +251,73 @@
       // check out
       $("#orderCheckout").click(function () {
         $("#addToOrder").click();
+        
+        console.log("NEW checkout");
+        console.log("pyxpub: " + pyxpubServer);
+        console.log("storename: " + storeName);
+        
         if (finalTotal > 0) {
-          $("#paymentSummary").show();
-          $("#itemList").hide();
-          var specificAmount = paymentAddress + '?amount=' + parseFloat(finalTotalBCH).toFixed(8);
-          var qrcode = kjua({
-            text: specificAmount,
-            ecLevel: 'H',
-            size: 177,
-            rounded: 100,
-            quiet: 0,
-            mSize: 26,
-            mPosX: 50,
-            mPosY: 50
-          });
-          if ($("#paymentCode").is(':empty')) {
-            $("#paymentTitle").empty();
-            $("#paymentTitle").append('Please transfer <span class="success label finalTotal">₿' +
-              parseFloat(finalTotalBCH).toFixed(8) + '</span> to:');
-            $("#paymentCode").append(qrcode);
-            $("#paymentAddress").val(paymentAddress);
-            getInitials();
+          // JSON address server implementation
+          //pyxpubServer = "http://localhost:8080";
+          if (pyxpubServer != "") {
+            var jsonRequest = pyxpubServer 
+                              + "/payment?amount=" 
+                              + parseFloat(finalTotalBCH).toFixed(8) 
+                              + "&label=" + storeName + ":PAYMENT123";
+            $.getJSON(jsonRequest, function( data ) {
+              var json = data['payment'];
+    //           $.each(json, function( key, val ) {
+    //             console.log(key + " : " + val);  
+    //           });
+              paymentAddress = json['addr'];
+              paymentURI = json['payment_uri'];
+              
+              $("#paymentSummary").show();
+              $("#itemList").hide();
+              console.log("payment uri: " + paymentURI);
+              var qrcode = kjua({
+                text: paymentURI,
+                ecLevel: 'H',
+                size: 177,
+                rounded: 100,
+                quiet: 0,
+                mSize: 26,
+                mPosX: 50,
+                mPosY: 50
+              });
+              if ($("#paymentCode").is(':empty')) {
+                $("#paymentTitle").empty();
+                $("#paymentTitle").append('Please transfer <span class="success label finalTotal">₿' +
+                  parseFloat(finalTotalBCH).toFixed(8) + '</span> to:');
+                $("#paymentCode").append(qrcode);
+                $("#paymentAddress").val(paymentAddress);
+                getInitials();
+              }
+            });
+          } else {
+            paymentURI = paymentAddress + '?amount=' + parseFloat(finalTotalBCH).toFixed(8);
+            
+            $("#paymentSummary").show();
+            $("#itemList").hide();
+            console.log("payment uri: " + paymentURI);
+            var qrcode = kjua({
+              text: paymentURI,
+              ecLevel: 'H',
+              size: 177,
+              rounded: 100,
+              quiet: 0,
+              mSize: 26,
+              mPosX: 50,
+              mPosY: 50
+            });
+            if ($("#paymentCode").is(':empty')) {
+              $("#paymentTitle").empty();
+              $("#paymentTitle").append('Please transfer <span class="success label finalTotal">₿' +
+                parseFloat(finalTotalBCH).toFixed(8) + '</span> to:');
+              $("#paymentCode").append(qrcode);
+              $("#paymentAddress").val(paymentAddress);
+              getInitials();
+            }
           }
         } else {
           toastr.error('No items to checkout');
@@ -539,6 +602,15 @@
                   <input type="submit" class="button" value="-" id="clearPaymentAddress">
               </div>
             </div>          
+        </label>
+        
+        <label>Pyxpub Private Payment Gateway
+          <div class="input-group">
+            <span class="input-group-label">
+              <i class="fi-key"></i>
+            </span>
+            <input id="inputServerName" class="input-group-field" type="text" placeholder="Pyxpub server">
+          </div>
         </label>
   
         <label>Local Currency<br/>
