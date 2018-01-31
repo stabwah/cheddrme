@@ -1,8 +1,8 @@
 # Cheddr
 
-Cheddr is a Bitcoin Cash Point Of Sale system that runs in most modern browsers (no server infrastructure required).
+Cheddr is a Bitcoin Cash Point Of Sale system that runs in most modern browsers - no server infrastructure required!
 
-To be lightning fast we accept zero-confirmation transactions (most payments completed within 2 seconds!).
+To be lightning fast we accept zero-confirmation transactions - most payments completed within 2 seconds!
 
 The online version is available at: https://pos.cheddr.cash/
 
@@ -15,7 +15,7 @@ The online version is available at: https://pos.cheddr.cash/
 - Multiple fiat currencies: exchange rate updated periodically
 
 Supported Currencies: 
-> BRL, CAD, CHF, CLP, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PKR, PLN, USD, RUB, SEK, SGD, THB, TRY, TWD, ZAR
+> AUD, BRL, CAD, CHF, CLP, CNY, CZK, DKK, EUR, GBP, HKD, HUF, IDR, ILS, INR, JPY, KRW, MXN, MYR, NOK, NZD, PHP, PKR, PLN, USD, RUB, SEK, SGD, THB, TRY, TWD, ZAR
 
 # Safety Concerns
 
@@ -50,11 +50,11 @@ For vendors that already have existing Point of Sale systems the quickest way to
 
 # TODO
 
-- Retry API on failure
-- Fall back to multiple APIs
-- Calculate transaction fee
-- History of transactions
-- Generate recieve addresses for user
+- Smart API rate limiting
+- Fall back APIs
+- Calculate recommended transaction fee
+- Printing transaction summary
+- Transaction history
 
 # Donations
 
