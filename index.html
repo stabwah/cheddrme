@@ -102,76 +102,79 @@
         showSplash();
       });
 
-      $("#saveSettings").click(function () {
-        // check recieve address has been added
-        var addedAddresses = $("#myAddresses").find('.addedAddress').text();
-        localStorage.removeItem("cheddrAddress");
-        if(addedAddresses.length > 1) {
-          $(".addedAddress").each(function() {
-            paymentAddress = $(this).text();
-            localStorage.setItem("cheddrAddress",paymentAddress);
-          });
-
-          var storeName = $("#inputStoreName").val();
-          if (storeName != null) {
-            $("#splashStoreName").text(storeName);
-            localStorage.setItem("cheddrStoreName",storeName);
-          }
-          var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
-          $("#blockchainExplorerLink").attr("href", blockExplorerUrl);
-          showSplash();
-        } else {
-          toastr.error("No addresses added")
-        }
+      $("#clearPaymentAddress").click(function () {
+        paymentAddress = "";
+        $("#inputAddress").val("");
+        toastr.error("Removed recieve address");
       });
 
-      $("#addPaymentAddress").click(function () {
-        var Format = bchaddr.Format;
-        var Network = bchaddr.Network;
-        var Type = bchaddr.Type;
-        var isLegacyAddress = bchaddr.isLegacyAddress;
-        var isBitpayAddress = bchaddr.isBitpayAddress;
-        var isCashAddress = bchaddr.isCashAddress;
-        var toCashAddress = bchaddr.toCashAddress;
-
+      $("#saveSettings").click(function () {
+        // check recieve address has been added
         var newAddress = $("#inputAddress").val();
-        if (newAddress.substring(0, 12) === "bitcoincash:") {
-          newAddress = newAddress.replace("bitcoincash:", '');
-        }
-        var validAddress = 0;
+        localStorage.removeItem("cheddrAddress");
+        if(newAddress.length > 1) {
+          
+          var Format = bchaddr.Format;
+          var Network = bchaddr.Network;
+          var Type = bchaddr.Type;
+          var isLegacyAddress = bchaddr.isLegacyAddress;
+          var isBitpayAddress = bchaddr.isBitpayAddress;
+          var isCashAddress = bchaddr.isCashAddress;
+          var toCashAddress = bchaddr.toCashAddress;
 
-        try {
-          if (isLegacyAddress(newAddress)) {
-            validAddress = 1;
-            toastr.warning("Converting Legacy address...");
+          var newAddress = $("#inputAddress").val();
+          if (newAddress.substring(0, 12) === "bitcoincash:") {
+              newAddress = newAddress.replace("bitcoincash:", '');
           }
-          if (isBitpayAddress(newAddress)) {
-            validAddress = 1;
-            toastr.warning("Converting BitPay address...");
-          }
-          if (isCashAddress(newAddress)) {
-            validAddress = 1;
-          }
-        } catch (e) {
-          toastr.error("Invalid address");
-        }
+          var validAddress = 0;
 
-        if (validAddress === 1) {
-          var cashaddr = toCashAddress(newAddress);
-          // add bitcoincash: prefix if not found
-          if (cashaddr.substring(0, 11) != "bitcoincash") {
-            cashaddr = 'bitcoincash:' + cashaddr;
+          try {
+              if (isLegacyAddress(newAddress)) {
+                  validAddress = 1;
+                  toastr.warning("Converting Legacy address...");
+              }
+              if (isBitpayAddress(newAddress)) {
+                  validAddress = 1;
+                  toastr.warning("Converting BitPay address...");
+              }
+              if (isCashAddress(newAddress)) {
+              validAddress = 1;
+              }
+          } catch (e) {
+              toastr.error("Invalid address");
+              showSettings();
           }
 
-          if (dupeAddress(cashaddr) === 0) {
-            paymentAddress = cashaddr;
-            $("#myAddresses").append('<div><span class="addedAddress">' + cashaddr +
-              '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>'
-            );
-            toastr.success("Recieve address added");
-          } else {
-            toastr.error("This address already exists");
+          if (validAddress === 1) {
+              var cashaddr = toCashAddress(newAddress);
+              // add bitcoincash: prefix if not found
+              if (cashaddr.substring(0, 11) != "bitcoincash") {
+                  cashaddr = 'bitcoincash:' + cashaddr;
+              }
+
+              if (paymentAddress != cashaddr) {
+                  paymentAddress = cashaddr;
+                  $("#inputAddress").val(cashaddr);
+                  localStorage.setItem("cheddrAddress",cashaddr);
+              /*
+                  '<div><span class="addedAddress">' +  +
+                  '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>'
+              );*/
+                  toastr.success("Recieve address added");
+              } else {
+                  toastr.error("This address already exists");
+              }
+              var storeName = $("#inputStoreName").val();
+              if (storeName != null) {
+                $("#splashStoreName").text(storeName);
+                localStorage.setItem("cheddrStoreName",storeName);
+              }
+              var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
+              $("#blockchainExplorerLink").attr("href", blockExplorerUrl);
+              showSplash();
           }
+        } else {
+          toastr.error("No recieve address")
         }
       });
 
@@ -350,7 +353,7 @@
 
       <div class="store-profile-content card-section">
         <div class="store-profile-avatar">
-          <img src="./images/bchlogo256.png" alt="Proudly Powered By Bitcoin Cash" />
+            <a href="https://www.bitcoincash.org" target="_blank"><img src="./images/bchlogo256.png"/></a>
         </div>
 
         <p class="splashStoreName" id="splashStoreName"></p>
@@ -370,8 +373,7 @@
   <div class="row align-center medium-unstack medium-8 large-8 text-center" id="mainForm">
     <div class="medium-4 large-4 columns callout text-center">
 
-      <h2>
-        <i class="fi-bitcoin-circle"> </i>CHEDDR</h2>
+      <img src="./images/cheddr.png">
 
       <hr>
       <div class="large-12 medium-12 columns">
@@ -435,7 +437,6 @@
           <div class="input-group-button">
             <button class="button" id="copyPaymentAddress" data-clipboard-target="#paymentAddress"><i class="fi-page-copy"></i></button>
           </div>
-
         </div>
 
         <!-- loading check -->
@@ -512,91 +513,101 @@
   </div>
   <!-- end totals -->
 
-  <!-- start settings -->
-  <div class="row align-center medium-unstack medium-5 large-5 text-center" id="settingsModal">
-    <div class="callout">
-      <h5><i class="fi-widget">&nbsp;</i>Settings</h5>
-
-      <hr>
-
-      <label>Store Name
-        <div class="input-group">
-          <span class="input-group-label">
-            <i class="fi-flag"></i>
-          </span>
-          <input id="inputStoreName" class="input-group-field" type="text" placeholder="Your Store Name (Optional)">
-        </div>
-      </label>
-
-      <label>Recieve Addresses
-        <div id="myAddresses" class="myAddresses text-center"></div>
-
-        <div class="input-group">
-            <span class="input-group-label"><i class="fi-key"></i></span>
-            <input id="inputAddress" class="input-group-field" type="text" placeholder="Add recieve address" value="1CKQgK1f5ZiRwb7DJM7pKKDaJuzE3mTKt8">
-            <div class="input-group-button">
-              <input type="submit" class="button" value="+" id="addPaymentAddress">
-            </div>
-          </div>          
-      </label>
-
-      <label>Local Currency
-        <select style="width: 5em;">
-          <option selected="selected" value="AUD">AUD</option>
-          <option value="BRL">BRL</option>
-          <option value="CAD">CAD</option>
-          <option value="CHF">CHF</option>
-          <option value="CLP">CLP</option>
-          <option value="CNY">CNY</option>
-          <option value="CZK">CZK</option>
-          <option value="DKK">DKK</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-          <option value="HKD">HKD</option>
-          <option value="HUF">HUF</option>
-          <option value="IDR">IDR</option>
-          <option value="ILS">ILS</option>
-          <option value="INR">INR</option>
-          <option value="JPY">JPY</option>
-          <option value="KRW">KRW</option>
-          <option value="MXN">MXN</option>
-          <option value="MYR">MYR</option>
-          <option value="NOK">NOK</option>
-          <option value="NZD">NZD</option>
-          <option value="PHP">PHP</option>
-          <option value="PKR">PKR</option>
-          <option value="PLN">PLN</option>
-          <option value="USD">USD</option>
-          <option value="RUB">RUB</option>
-          <option value="SEK">SEK</option>
-          <option value="SGD">SGD</option>
-          <option value="THB">THB</option>
-          <option value="TRY">TRY</option>
-          <option value="TWD">TWD</option>
-          <option value="ZAR">ZAR</option>
-        </select>
-      </label>
-      <hr>
-
-      <div class="input-group-button">
-      <a class="button warning hollow" id="cancelSettings">
-        <i class="fi-prohibited"></i>
-      </a>
-      <a class="button success" id="saveSettings">
-        <i class="fi-check"></i>
-      </a>
+   <!-- start settings -->
+   <div class="row align-center medium-unstack medium-5 large-5 text-center" id="settingsModal">
+      <div class="callout">
+        <h5><i class="fi-widget">&nbsp;</i>Settings</h5>
+  
+        <hr>
+  
+        <label>Store Name
+          <div class="input-group">
+            <span class="input-group-label">
+              <i class="fi-flag"></i>
+            </span>
+            <input id="inputStoreName" class="input-group-field" type="text" placeholder="Your Store Name (Optional)">
+          </div>
+        </label>
+  
+        <label>Recieve Address
+          <div id="myAddresses" class="text-center"></div>
+  
+          <div class="input-group">
+              <span class="input-group-label"><i class="fi-key"></i></span>
+              <input id="inputAddress" class="input-group-field" type="text" placeholder="Add recieve address">
+              <div class="input-group-button">
+                  <input type="submit" class="button" value="-" id="clearPaymentAddress">
+              </div>
+            </div>          
+        </label>
+  
+        <label>Local Currency<br/>
+          <select style="width: 10em;">
+            <option selected="selected" value="AUD">AUD</option>
+            <option value="BRL">BRL</option>
+            <option value="CAD">CAD</option>
+            <option value="CHF">CHF</option>
+            <option value="CLP">CLP</option>
+            <option value="CNY">CNY</option>
+            <option value="CZK">CZK</option>
+            <option value="DKK">DKK</option>
+            <option value="EUR">EUR</option>
+            <option value="GBP">GBP</option>
+            <option value="HKD">HKD</option>
+            <option value="HUF">HUF</option>
+            <option value="IDR">IDR</option>
+            <option value="ILS">ILS</option>
+            <option value="INR">INR</option>
+            <option value="JPY">JPY</option>
+            <option value="KRW">KRW</option>
+            <option value="MXN">MXN</option>
+            <option value="MYR">MYR</option>
+            <option value="NOK">NOK</option>
+            <option value="NZD">NZD</option>
+            <option value="PHP">PHP</option>
+            <option value="PKR">PKR</option>
+            <option value="PLN">PLN</option>
+            <option value="USD">USD</option>
+            <option value="RUB">RUB</option>
+            <option value="SEK">SEK</option>
+            <option value="SGD">SGD</option>
+            <option value="THB">THB</option>
+            <option value="TRY">TRY</option>
+            <option value="TWD">TWD</option>
+            <option value="ZAR">ZAR</option>
+          </select>
+        </label>
+        <hr>
+  
+        <div class="input-group-button">
+        <a class="button warning hollow" id="cancelSettings">
+          <i class="fi-prohibited"></i>
+        </a>
+        <a class="button success" id="saveSettings">
+          <i class="fi-check"></i>
+        </a>
+      </div>
+  
+      </div>
     </div>
-
-    </div>
-  </div>
   <!-- end settings -->
 
-  <!-- start footer -->
-  <div class="medium-12 large-12 columns text-center">
+ <!-- start footer -->
+ <div id="cheddrFooter" class="row align-center medium-unstack medium-2 large-2 text-center">
+    <br/><br/><br/><br/>
+    <div class="medium-6 large-6 columns text-center">
+        <section>
+            <a href=""><img src="./images/main_ico_donate.png" alt="Donate" height="32px" width="32px"></a>
+        </section>
+    </div>
+    <div class="medium-6 large-6 columns text-center">
+        <section>
+            <a href="https://github.com/stabwah/cheddrme" target="_blank"><img src="./images/main_ico_github.png" alt="GitHub" height="32px" width="32px"></a>
+        </section>
+    </div>
+</div>
+<!-- end footer -->  
 
-  </div>
-  <!-- end footer -->
 
 </body>
-
 </html>

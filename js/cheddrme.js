@@ -77,6 +77,8 @@ function showSplash() {
     resetOrderForm();
     $("#mainForm").hide();
     $("#menubar").hide();
+
+    $("#cheddrFooter").show();    
 }
 
 function showMain() {
@@ -84,6 +86,7 @@ function showMain() {
     $("#menubar").show();
     $("#storeSplash").hide();
     $("#settingsModal").hide(); 
+    $("#cheddrFooter").hide();
     updateScreen(0);
     resetOrderForm();
 }
@@ -91,13 +94,14 @@ function showMain() {
 function showSettings() {
     $("#storeSplash").hide();
     $("#settingsModal").show();
+    $("#cheddrFooter").show();
 
     var checkSaved = localStorage.getItem("cheddrAddress");
     if (checkSaved != null) {
       // found saved address
-      $("#myAddresses").empty();
-      $("#myAddresses").append('<div><span class="addedAddress">' + checkSaved +
-              '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>');
+      //$("#myAddresses").empty();
+    /*  $("#myAddresses").append('<div><span class="addedAddress">' + checkSaved +
+              '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>'); */
     } 
 
     var checkStore = localStorage.getItem("cheddrStoreName");
@@ -412,24 +416,6 @@ updateTotals = function () {
 
     finalTotalBCH = finalTotalBits / 1000000;
     $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
-};
-
-// check if address already exists in list
-dupeAddress = function (input) {
-    var newAdd = input;
-    var dupesExist = $("#myAddresses").find('.addedAddress').text();
-    if(dupesExist.length > 1) {
-        $(".addedAddress").each(function() {
-            testAdd = $(this).text();
-            if (newAdd === testAdd) {
-                return 1;
-            } else {
-                return 0;
-            }
-        });
-    } else {
-        return 0;
-    }
 };
 
 // Retrieve list of recieve addresses (so we can rotate later)
