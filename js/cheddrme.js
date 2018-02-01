@@ -73,12 +73,13 @@ function showSplash() {
     updateFiatSymbol();  
     getExchRate(fiat); 
     
+    $("#donateModal").hide();
     $("#settingsModal").hide();
     resetOrderForm();
     $("#mainForm").hide();
     $("#menubar").hide();
-
     $("#cheddrFooter").show();    
+    $("#qrbch").hide();
 }
 
 function showMain() {
@@ -86,7 +87,9 @@ function showMain() {
     $("#menubar").show();
     $("#storeSplash").hide();
     $("#settingsModal").hide(); 
+    $("#donateModal").hide();
     $("#cheddrFooter").hide();
+    $("#qrbch").hide();
     updateScreen(0);
     resetOrderForm();
 }
@@ -94,7 +97,9 @@ function showMain() {
 function showSettings() {
     $("#storeSplash").hide();
     $("#settingsModal").show();
+    $("#donateModal").hide();
     $("#cheddrFooter").show();
+    $("#qrbch").hide();
 
     var checkSaved = localStorage.getItem("cheddrAddress");
     if (checkSaved != null) {
