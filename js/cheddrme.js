@@ -418,6 +418,7 @@ updateTotals = function () {
         finalTotalFiat += parseFloat(orderPriceText);
     });
     $("#orderTotalFiat").text(fiatSymbol + finalTotalFiat.toFixed(2));
+    finalTotal = finalTotalFiat;
 
     finalTotalBCH = finalTotalBits / 1000000;
     $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
