@@ -5,26 +5,26 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CHEDDR</title>
-
-  <link rel="stylesheet" href="css/cheddrme.css" />
-  <link rel="stylesheet" href="css/foundation.css" />
-  <link rel="stylesheet" href="css/foundation-icons.css" />
-  <link rel="stylesheet" href="css/toastr.min.css" />
-
   <script type="text/javascript" src="js/jquery.js"></script>
-  <script type="text/javascript" src="js/foundation.min.js"></script>
-  <script type="text/javascript" src="js/toastr.min.js"></script>
-  <script type="text/javascript" src="js/kjua-0.1.1.min.js"></script>
-  <script type="text/javascript" src="js/bchaddrjs-0.1.4.js"></script>
-  <script type="text/javascript" src="js/cheddrme.js"></script>
-
-  <!--
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+  <!-- <script type="text/javascript" src="js/foundation.js"></script> -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.min.js"></script>
+  <script type="text/javascript" src="js/bchaddrjs-0.1.4.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/kjua@0.1.2/dist/kjua.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+  <script type="text/javascript" src="js/cheddrme.js"></script>
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"/>
+  <link rel="stylesheet" href="css/foundation.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css"/>
+  <link rel="stylesheet" href="css/cheddrme.css"/>
+
+  <!--
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.min.js"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/kjua@0.1.2/dist/kjua.min.js"></script>
   -->
 
   <script type="text/javascript">
@@ -86,6 +86,15 @@
         showSettings();
         $("#cancelSettings").hide();
       }
+
+      /* donate modal */
+      $("#closeDonationSplash").click(function () {
+        $(this).dialog("close");
+      });  
+
+      $("#showDonate").click(function () {
+        $("#donateModal").dialog();
+      });
 
       /* start splash */
       $("#refreshCog").click(function () {
@@ -325,6 +334,10 @@
       });
 
       /* start order summary */
+      $("#orderPrint").click(function () {
+        window.print();
+      });
+
       $("#orderCancel").click(function () {
         $("#itemList").show();
         $("#paymentSummary").hide();
@@ -345,7 +358,7 @@
         checkTransaction(finalTotalBCH);
 
         console.log("retry:: " + checkLoop);
-        if (++checkLoop === 4) {
+        if (++checkLoop === 3) {
             toastr.warning("Could not confirm transaction")
             clearInterval(intervalTransCheck);
 
@@ -370,18 +383,33 @@
 
 <body>
     <br/>
+    <!-- donate modal -->
+    <div class="row align-center medium-unstack medium-3 large-3 text-center" id="donateModal">
+        <div class="callout">
+          <i class="fi-heart hearty"></i>
+          <h4>Donate</h4>
+          <hr>
+          Please consider making a donation to help support continued development.<br/><br/>
+          Feel free to leave me a note in the label of your transaction<br/><br/>
+          <div id="donateCode"><img src="./images/donateQr.png" width="200"></div>
+          <hr>       
+          <a href="#donateModal" rel="modal:close" class="button warning" id="closeDonation"><img src="./images/happy.png" width="32px"></a>
+        </div>
+      </div>
+      <!-- end donate modal -->
+
     <!-- side menu -->
     <div class="row align-center medium-unstack medium-4 large-4 text-center" id="menubar">
-       <div style="position:absolute;left:5%;top:2%;">
+       <div style="position:absolute;left:4%;top:5%;">
+          <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Donate!"><a href="#donateModal" rel="modal:open"><img src="./images/main_ico_donate.png" id="showDonate" alt="Donate" width="30px" height="32px"></a></span>
+          <br/>
          <a href="#" id="sideSettingsCog">
-           <i class="fi-widget settings">&nbsp;</i>
+           &nbsp;&nbsp;<i class="fi-widget settingsIcon" style="line-height: 2em">&nbsp;</i>
          </a>
          <br/>
-         <!-- <a href="#" id="refresh"><i class="fi-refresh settings">&nbsp;</i></a><br/> -->
          <a href="#" id="backToSplash">
-           <i class="fi-arrow-left settings">&nbsp;</i>
-         </a>
-         <br/>
+            &nbsp;&nbsp;<i class="fi-arrow-left settingsIcon">&nbsp;</i>
+         </a>          
        </div>
      </div>
      <!-- side menu -->
@@ -396,11 +424,11 @@
       </div>
 
       <div style="position:absolute;left:80%;top:2%;" id="blockchainExplorer">
-          <a href="#" id="blockchainExplorerLink" target="_blank"><i class="fi-clipboard-notes settings">&nbsp;</i></a>
+        <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Blockchain Explorer"><a href="#" id="blockchainExplorerLink" target="_blank"><i class="fi-magnifying-glass settingsIcon">&nbsp;</i></a></span>
       </div>
 
       <div style="position:absolute;left:90%;top:2%;">
-        <a href="#" id="settingsCog"><i class="fi-widget settings">&nbsp;</i></a>
+        <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Settings"><a href="#" id="settingsCog"><i class="fi-widget settingsIcon">&nbsp;</i></a></span>
       </div>
 
       <div style="position:absolute; top:20%; margin-left: auto; margin-right: auto; width: 100%;">
@@ -439,7 +467,7 @@
       <img src="./images/cheddr.png">
 
       <hr>
-      <div class="large-12 medium-12 columns">
+      <div class="large-22 medium-12 columns">
         <div class="input-group">
           <span id="fiatSymbol" class="input-group-label"></span>
           <input class="input-group-field" type="text" id="mainDisplay"/>
@@ -498,7 +526,7 @@
         <div class="input-group">
           <input class="input-group-field" type="text" id="paymentAddress">
           <div class="input-group-button">
-            <button class="button" id="copyPaymentAddress" data-clipboard-target="#paymentAddress"><i class="fi-page-copy"></i></button>
+            <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Copy Payment Address"><button class="button" id="copyPaymentAddress" data-clipboard-target="#paymentAddress"><i class="fi-page-copy"></i></button></span>
           </div>
         </div>
 
@@ -519,11 +547,14 @@
         </div>
         <hr>
         <div>
-          <a class="alert large-2 button" id="orderCancel">
-            <i class="fi-x"></i>
+          <a class="button large-2 alert" id="orderCancel">
+            <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Cancel"><i class="fi-x"></i></span>
           </a>
-          <a class="success large-2 button" id="orderDone">
-            <i class="fi-check"></i>
+          <a class="button large-2 hollow secondary" id="orderPrint">
+              <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Print"><i class="fi-print"></i></span>
+          </a>  
+          <a class="button large-2 success" id="orderDone">
+            <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Verify">><i class="fi-check"></i></span>
           </a>
           <div id="summaryWaiterText">Looking for transaction...<br/><br/></div>
         </div>
@@ -579,7 +610,7 @@
    <!-- start settings -->
    <div class="row align-center medium-unstack medium-5 large-5 text-center" id="settingsModal">
       <div class="callout">
-        <h5><i class="fi-widget">&nbsp;</i>Settings</h5>
+        <h5><i class="fi-wrench settingsIcon"><br/></i>Settings</h5>
   
         <hr>
   
@@ -599,7 +630,7 @@
               <span class="input-group-label"><i class="fi-key"></i></span>
               <input id="inputAddress" class="input-group-field" type="text" placeholder="Add recieve address">
               <div class="input-group-button">
-                  <input type="submit" class="button" value="-" id="clearPaymentAddress">
+                <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Remove Address"><input type="submit" class="button" value="-" id="clearPaymentAddress"></span>
               </div>
             </div>          
         </label>
@@ -652,11 +683,11 @@
         <hr>
   
         <div class="input-group-button">
-        <a class="button warning hollow" id="cancelSettings">
-          <i class="fi-prohibited"></i>
+        <a class="button warning hollow large-2" id="cancelSettings">
+          <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Cancel"><i class="fi-prohibited"></i></span>
         </a>
-        <a class="button success" id="saveSettings">
-          <i class="fi-check"></i>
+        <a class="button success large-2" id="saveSettings">
+          <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Save"><i class="fi-check"></i></span>
         </a>
       </div>
   
@@ -669,17 +700,16 @@
     <br/><br/><br/><br/>
     <div class="medium-6 large-6 columns text-center">
         <section>
-            <a href=""><img src="./images/main_ico_donate.png" alt="Donate" height="32px" width="32px"></a>
+            <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Donate!"><a href="#donateModal" rel="modal:open"><img src="./images/main_ico_donate.png" id="showDonate" alt="Donate" height="32px" width="32px"></a></span>
         </section>
     </div>
     <div class="medium-6 large-6 columns text-center">
         <section>
-            <a href="https://github.com/stabwah/cheddrme" target="_blank"><img src="./images/main_ico_github.png" alt="GitHub" height="32px" width="32px"></a>
+          <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="View on Github"><a href="https://github.com/stabwah/cheddrme" target="_blank"><img src="./images/main_ico_github.png" alt="GitHub" height="32px" width="32px"></a></span>
         </section>
     </div>
 </div>
 <!-- end footer -->  
-
-
+<img src="./images/qrbchwhite.png" id="qrbch">
 </body>
 </html>

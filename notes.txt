@@ -1,6 +1,27 @@
 BCH API: https://bch.btc.com/api-doc
 
 TODO:
-    rotate recieve addresses
-    calculate transaction fee 
-	
+    - rate limit (59 seconds total)
+    var intervalRateLimit;
+    var rateLimit = 2000;
+    var rateLimitAttempts = 1;
+
+    intervalRateLimit = setInterval(function () {  
+        if (rateLimitAttempts <= 5) {
+            rateLimitAttempts += 1;
+            // checkTrans();
+            rateLimit += 3000;
+        } else {
+            // stop re-trying
+            clearInterval(intervalRateLimit);
+        }
+    }, rateLimit);
+
+    - print - https://developer.mozilla.org/en-US/docs/Web/CSS/@media
+        // remove all background colours & images
+        $('*').css('background', 'transparent');
+        eg: https://www.bennadel.com/blog/1591-ask-ben-print-part-of-a-web-page-with-jquery.htm
+
+    - rotate recieve addresses
+
+    - calculate transaction fee 

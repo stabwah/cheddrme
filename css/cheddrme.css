@@ -1,16 +1,62 @@
 @import url(https://fonts.googleapis.com/css?family=Lato);
-@import url(https://fonts.googleapis.com/css?family=Raleway);
-/* <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato|Raleway"/> */
+@import url(https://fonts.googleapis.com/css?family=Raleway); 
+@import url(https://fonts.googleapis.com/css?family=Montserrat); 
 
+/* override foundation styles */
 body {
   font-family: 'Lato', sans-serif;
   margin: 0;
   padding: 0;
 }
 
-/* store splash */
+#qrbch {
+  display: none;
+}
+
+.has-tip {
+  border-bottom: 0px;
+}
+
+.tooltip:before {
+  border-bottom-style: none;
+}
+
+.modal {
+  box-sizing: border-box;
+  width: 28%;
+  background: #000;
+  padding: 1px 1px;
+  -webkit-border-radius: 1px;
+  -moz-border-radius: 1px;
+  -o-border-radius: 1px;
+  -ms-border-radius: 1px;
+  border-radius: 1px;
+  -webkit-box-shadow: 0 0 1px #000;
+  -moz-box-shadow: 0 0 1px #000;
+  -o-box-shadow: 0 0 1px #000;
+  -ms-box-shadow: 0 0 1px #000;
+  box-shadow: 0 0 1px #000;
+  text-align: center;
+}
+
+.settingsIcon { 
+  font-size: 32px;
+  color: #d3d3d3;
+}
+
+.hearty { 
+  font-size: 40px;
+  color: #E33100;
+  text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #E33100, 0 0 30px #E33100, 0 0 40px #E33100, 0 0 50px #E33100, 0 0 75px #E33100;
+}
+
+#closeDonation {
+  border-radius: 1000px; 
+}
+
+/* clock display */
 #clockDisplayDate {
-  font-family: 'Raleway', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 1.5em;
   text-align: center;
   text-shadow: 0 0 2px #ffffff;
@@ -27,9 +73,10 @@ body {
   display: inline;
   font-size: 3em;
   text-align: center;
-  font-family: 'Raleway', sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 
+/* store splash */
 .store-profile {
   position: relative;
   z-index: 0;
@@ -126,7 +173,6 @@ body {
   letter-spacing: 1px;
   opacity: 0.8;
 }
-/* store splash */
 
 /* settings */
 .splash {
@@ -141,11 +187,6 @@ body {
   color: #8DC451;
 }
 
-/*
-.removeAddress {
-  color: rgb(180, 16, 10);
-} */
-
 .myAddresses {
   color: #8DC451;
   word-spacing: 2em;
@@ -156,7 +197,8 @@ body {
 .inputAddress {
   width: 10em;
 }
-/* settings */
+
+/* main form (order page) */ 
 
 .orderTotal {
   color: rgba(255, 255, 255, 1);
@@ -216,6 +258,7 @@ th {
   position: absolute;
 }
 
+/* loading spinner animation */
 @keyframes loader-spin {
   0% {
     transform: rotate(0deg);
@@ -246,4 +289,3 @@ th {
     opacity: 1;
   }
 }
-/* loading spinner */
