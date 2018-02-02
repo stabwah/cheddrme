@@ -1,0 +1,145 @@
+<!--
+/* source: https://github.com/h5bp/html5-boilerplate/blob/master/dist/doc/TOC.md#print-styles */
+@media print
+{
+    /* page-break-after: avoid;
+       page-break-inside: avoid; */
+
+    /* Remove text-shadow in selection highlight: */
+    ::selection {
+        background: #ffffff;
+        text-shadow: none;
+    }
+
+    /* A better looking default horizontal rule */
+
+    hr {
+        display: block;
+        height: 1px;
+        border: 0;
+        border-top: 1px solid #ccc;
+        margin: 1em 0;
+        padding: 0;
+    }
+
+    /*
+    * Remove the gap between audio, canvas, iframes,
+    * images, videos and the bottom of their containers:
+    * https://github.com/h5bp/html5-boilerplate/issues/440
+    */
+
+    audio,
+    canvas,
+    iframe,
+    img,
+    svg,
+    video {
+        vertical-align: middle;
+    }
+
+    /* Remove default fieldset styles */
+
+    fieldset {
+        border: 0;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Allow only vertical resizing of textareas */
+
+    textarea {
+        resize: vertical;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    body, div, p, span { 
+        background-color:#FFFFFF;
+        background-image:none; 
+        color:#000000;
+        font: 12pt Georgia, "Times New Roman", Times, serif;
+        line-height: 1.3;
+    }
+
+    img {
+        border: 0;
+    }
+
+    p a:after {
+        content: " " attr(href) ")";
+    }
+    p a[href^="#"]:after {
+        display: none;
+    }
+    p a[href^="http://"]:after, a[href^="https://"]:after {
+        content: " (" attr(href) ")";
+    }
+    p a {
+        word-wrap: break-word;
+    }
+    a {
+        background: transparent !important;
+        color: #000 !important; /* Black prints faster */
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    /*
+     * Don't show links that are fragment identifiers,
+     * or use the `javascript:` pseudo protocol
+     */
+
+    a[href^="#"]:after,
+    a[href^="javascript:"]:after {
+        content: "";
+    }
+
+    pre {
+        white-space: pre-wrap !important;
+    }
+    pre,
+    blockquote {
+        border: 1px solid #999;
+        page-break-inside: avoid;
+    }
+
+    /*
+     * Printing Tables:
+     * http://css-discuss.incutio.com/wiki/Printing_Tables
+     */
+
+    thead {
+        display: table-header-group;
+    }
+
+    tr,
+    img {
+        page-break-inside: avoid;
+    }
+
+    p,
+    h2,
+    h3 {
+        orphans: 3;
+        widows: 3;
+    }
+
+    h2,
+    h3 {
+        page-break-after: avoid;
+    }
+
+    #itemList, #orderedItems    { display: inline; }
+    #paymentSummary, #summaryWaiter,  { display: none; }
+    #donateModal    { display:none; }
+    #menubar, #sideMenu        { display:none; }
+    #storeSplash    { display:none; }
+    #settingsModal  { display:none; }
+    #cheddrFooter   { display:none; }
+    .keypad, #inputFields        { display:none; }
+    #cheddrLogo     { display:none; }
+    #addToOrder, #clearInput, #orderCheckout, #orderCancel, #orderPrint, #orderDone, #copyPaymentAddress { display:none; }
+}
+-->

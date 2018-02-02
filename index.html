@@ -18,11 +18,12 @@
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
   <script type="text/javascript" src="js/cheddrme.js"></script>
   
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"/>
-  <link rel="stylesheet" href="css/foundation.css"/>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css"/>
-  <link rel="stylesheet" href="css/cheddrme.css"/>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css"/>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css"/>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css"/>
+  <link rel="stylesheet" type="text/css" href="css/foundation.css"/>
+  <link rel="stylesheet" type="text/css" href="css/cheddrme.css"/>
+  <link rel="stylesheet" type="text/css" media="print" href="css/print.css">
 
   <!--
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
@@ -278,7 +279,7 @@
 
       /* start order summary */
       $("#orderPrint").click(function () {
-        window.print();
+          orderPrint();
       });
 
       $("#orderCancel").click(function () {
@@ -343,7 +344,7 @@
 
     <!-- side menu -->
     <div class="row align-center medium-unstack medium-4 large-4 text-center" id="menubar">
-       <div style="position:absolute;left:4%;top:5%;">
+       <div style="position:absolute;left:4%;top:5%;" id="sideMenu">
           <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Donate!"><a href="#donateModal" rel="modal:open"><img src="./images/main_ico_donate.png" id="showDonate" alt="Donate" width="30px" height="32px"></a></span>
           <br/>
          <a href="#" id="sideSettingsCog">
@@ -405,9 +406,9 @@
 
   <!-- main form -->
   <div class="row align-center medium-unstack medium-8 large-8 text-center" id="mainForm">
-    <div class="medium-4 large-4 columns callout text-center">
+    <div class="medium-4 large-4 columns callout text-center" id="inputFields">
 
-      <img src="./images/cheddr.png">
+      <img src="./images/cheddr.png" id="cheddrLogo" alt="cheddr pos">
 
       <hr>
       <div class="large-22 medium-12 columns">
@@ -497,7 +498,7 @@
               <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Print"><i class="fi-print"></i></span>
           </a>  
           <a class="button large-2 success" id="orderDone">
-            <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Verify">><i class="fi-check"></i></span>
+            <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Verify"><i class="fi-check"></i></span>
           </a>
           <div id="summaryWaiterText">Looking for transaction...<br/><br/></div>
         </div>
