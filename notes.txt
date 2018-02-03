@@ -17,11 +17,12 @@ TODO:
         }
     }, rateLimit);
 
-    - print - https://developer.mozilla.org/en-US/docs/Web/CSS/@media
-        // remove all background colours & images
-        $('*').css('background', 'transparent');
-        eg: https://www.bennadel.com/blog/1591-ask-ben-print-part-of-a-web-page-with-jquery.htm
+    - printing:
+        open new page with invoice
 
     - rotate recieve addresses
 
-    - calculate transaction fee 
+    - calculate recommended transaction fee 
+
+    - find currency by html5 geolocation:
+    https://coliff.github.io/geoip-db-country-select/
