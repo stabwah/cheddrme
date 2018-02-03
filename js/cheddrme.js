@@ -134,6 +134,21 @@ function resetOrderForm() {
 }
 
 function orderPrint() {
+    $("#itemList").show();
+    $("#orderedItems").show();
+    $(".keypad").hide();
+    $("#paymentTitle").hide();
+    $("#paymentSummary").hide();
+    $("#menubar").hide();
+    $("#inputFields").hide();
+    $("#summaryQrCode").hide();
+    $("#summaryFeeRecommend").hide();
+    $("#summaryWaiter").hide();
+    $("#summaryWaiterText").hide();
+    $("#storeSplash").hide();
+    $("#settingsModal").hide(); 
+    $("#donateModal").hide();
+    $("#cheddrFooter").hide();
     window.print();
 }
 

@@ -1,0 +1,337 @@
+::-moz-selection {
+  background-color: #ffa200; 
+  color: #fff;
+}
+
+::selection {
+  background-color: #ffa200; 
+  color: #fff;
+}
+
+header{
+    /*background-image:url(images/stock-photo.jpg) no-repeat center center;*/
+    background-image: url(../images/header-bg.png);
+    height: 800px;
+    background-repeat: none;
+    background-attachment: scroll;
+    background-position: center center;
+    background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    text-align: center;
+    color: white;
+}
+
+h1, nav h2{
+    display: none;
+}
+
+#example-menu,
+#example-menu > .top-bar-right > ul,
+#example-menu > .top-bar-left > ul{
+    background-color: #332d2d;
+}
+
+.landingSpacer {
+    font-size: 0.1em;
+}
+
+ul.menu, ul.menu li a{
+    color: #ffa200;
+}
+
+.page-title{
+    margin-top: 80px;
+}
+
+.page-title h4{
+    font-size: 100px;
+    font-family: 'Squada One', cursive;
+}
+
+.page-title p,
+.page-title span{
+    font-family: 'Montserrat Alternates', sans-serif;
+}
+
+.page-title .fa{
+    padding: 40px 0 20px 0;
+    font-size: 160px;
+    color: #ffa200;
+}
+
+#landingLetsGo,
+#landingResources,
+#landingDonate{
+    background-color: #332d2d;
+    color: #fff;
+    text-align: center;
+    padding-bottom: 40px;
+}
+
+
+#landingLetsGo > h2,
+#landingAbout > h2{
+    display: none;
+}
+
+#landingLetsGo h4{
+    font-size: 54px;
+    font-family: 'Squada One', cursive;
+}
+
+#landingLetsGo p{
+    font-family: 'Montserrat Alternates', sans-serif;
+}
+
+#landingLetsGo .stats{
+    margin-top: 2em;
+}
+
+#landingLetsGo .stats > p{
+    color: #8a8a8a;
+}
+
+#landingLetsGo .stats .single-stat span{
+    font-size: 5em;
+    color: #ffa200;
+}
+
+#landingAbout {
+    background-image: url(../images/sky.jpg);
+    height: 600px;
+    background-repeat: none;
+    background-attachment: scroll;
+    background-position: center center;
+    background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    text-align: center;
+    color: white;
+}
+
+#landingAbout .hero-content{
+    margin-top: 180px;
+}
+
+#landingAbout .hero-img{
+    margin-top: 140px;
+}
+
+#landingAbout .hero h4{
+    font-size: 54px;
+    font-family: 'Squada One', cursive;
+}
+
+#landingAbout .hero p:last-child{
+    font-family: 'Montserrat Alternates', sans-serif;
+}
+
+#landingResources > h2{
+    font-size: 54px;
+    font-family: 'Squada One', cursive;
+    text-align: center;
+    padding: 40px 0;
+}
+
+#pricing > h2{
+    font-size: 54px;
+    font-family: 'Squada One', cursive;
+    text-align: center;
+    padding: 40px 0 60px 0;
+}
+
+#pricing{
+    padding-bottom: 100px;
+}
+
+#landingResources .callout.project{
+    border: none;
+    background-color: #332d2d;
+    color: #fff;
+}
+
+#landingResources .project{
+    text-align: center;
+}
+
+#landingResources .project img{
+    width: 338px;
+    height: 314px;
+}
+
+#landingResources .project p:nth-child(2){
+    font-family: 'Squada One', cursive;
+    font-size: 22px;
+}
+
+#landingResources .project p:last-child{
+     color: #8a8a8a;   
+}
+
+.pricing-table{
+    cursor: pointer;
+}
+
+.active-table {
+  position: relative;
+  /*box-shadow: 0px 2px 10px 0px rgba(50, 50, 50, 0.5);*/
+  transform: scale(1);
+  border: 0;
+  transition: 0.4s ease;
+  z-index: 13;
+  background-color: #fff; 
+}
+
+.active-table:hover {
+    position: relative;
+    /*box-shadow: 0px 2px 10px 0px rgba(50, 50, 50, 0.5);*/
+    transform: scale(1.25);
+    border: 0;
+    z-index: 115;
+}
+
+.active-table:hover p{
+    background-color: #ffa200;
+}
+
+.active-table p{
+    text-align: center;
+    background-color: #332d2d;
+    color: #fff;
+    font-size: 38px;
+    font-family: 'Squada One', cursive;
+    text-transform: uppercase;
+    margin: 0 -7px;
+}
+
+.pricing-table .offer-list{
+    margin-left: 0;
+}
+
+.pricing-table ul li{
+    list-style: none;
+    text-align: center;
+    font-family: 'Montserrat Alternates', sans-serif;
+}
+
+.pricing-table .offer-list li:first-child{
+    margin-top: 16px;
+}
+
+.pricing-table .offer-list .price{
+    font-size: 72px;
+    font-family: 'Squada One', cursive;
+}
+
+#landingResources > h2{
+    padding-top: 40px;
+    font-size: 54px;
+    font-family: 'Squada One', cursive;
+    text-align: center;  
+}
+
+#landingDonate > h2{
+    padding-top: 40px;
+    font-size: 54px;
+    font-family: 'Squada One', cursive;
+    text-align: center;  
+}
+
+#landingDonate > p{
+    color: #8a8a8a;
+}
+
+
+footer{
+    text-align: center;
+}
+
+footer .callout.secondary{
+    background-color: #ffa200;
+    color: #fff;
+    margin-bottom: 0;
+}
+
+footer h4{
+    font-family: 'Squada One', cursive;  
+}
+
+footer p{
+    font-family: 'Montserrat Alternates', sans-serif;
+}
+
+footer .social-media i{
+    font-size: 42px;
+    -moz-transition: color 1.0s ease;
+    -o-transition: color 1.0s ease;
+    -webkit-transition: color 1.0s ease;
+    transition: color 1.0s ease;
+    padding-left: 8px;
+    color: #fff;
+}
+
+footer .social-media h4{
+    padding-bottom: 20px;
+}
+
+footer .location i {
+    font-size: 34px;
+    color: #fff;
+    padding-right: 12px;
+}
+
+footer .location p {
+    text-align: center;
+    font-size: 18px;
+    padding-bottom: 8px;
+}
+
+footer .copyright{
+    background-color: #332d2d;
+    padding-top: 12px;
+    color: #fff;
+}
+
+@media(max-width: 639px){
+    .page-title h4{
+        font-size: 50px;
+    }
+
+    .page-title .fa{
+        font-size: 80px;
+    }
+
+    #landingAbout > h4{
+        font-size: 22px;
+    }
+
+    #landingAbout .hero-content{
+        margin-top: 80px;
+    }
+
+    #landingAbout .hero-img{
+        margin-top: 140px;
+    }
+
+    #landingAbout .hero p:first-child{
+        font-size: 34px;
+    }
+
+    #landingAbout .hero P:last-child{
+        font-size: 14px;
+    }
+
+    .pricing-table:not(.pricing-table:first-child){
+        margin-top: 40px;
+    }
+}
+
+@media(max-width:400px){
+    #landingAbout .hero p:last-child{
+        font-size: 12px;
+    }
+}
+
