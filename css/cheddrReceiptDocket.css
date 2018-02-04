@@ -1,0 +1,132 @@
+body {
+  font-family: 'Lato', sans-serif;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+  font-size: 11px;
+  word-wrap: break-word;
+}
+hr.bottom { 
+  border: 0 none;
+  border-top: 1px dashed #bbb3bb;
+  background: none;
+  height:0;
+} 
+#cheddrInvoice h1 {
+  font-size: 1.5em;
+  color: #222;
+}
+#cheddrInvoice h2 {
+  font-size: .9em;
+}
+#cheddrInvoice h3 {
+  font-size: 1.2em;
+  font-weight: 300;
+  line-height: 2em;
+}
+#cheddrInvoice p {
+  font-size: 0.7em;
+  color: #666;
+  line-height: 1em;
+}
+#cheddrInvoice table {
+  text-align: left;
+  width: 100%;
+  border-collapse: collapse;
+}
+#cheddrInvoice .invoiceTitle {
+  font-size: 0.7em;
+  line-height: 0.5em;
+  background: #EEE;
+}
+.itemHeader {
+  width: 50em;
+  min-height: 5em;
+}
+.fiatHeader {
+  width: 7em;
+  text-align: right;
+}
+.bitsHeader {
+  width: 12em;
+  text-align: right;
+}
+.itemName {
+  font-size: 0.6em;
+}
+.itemPriceFiat, .itemPriceBits {
+  font-size: 0.7em;
+  text-align: right;
+}
+.itemPrice {
+  font-size: 0.7em;
+  text-align: right;
+}
+.itemPriceBCH {
+  font-size: 0.67em;
+  text-align: right;
+}
+.invoiceSubTotal {
+  font-size: 0.7em;
+  line-height: 0.5em;
+  background: rgb(241, 241, 241);
+}
+.taxFiat, .taxBits {
+  font-size: 1em;
+  text-align: right;
+}
+.totalFiat, .totalBits {
+  font-size: 1em;
+  text-align: right;
+}
+.invoiceTotal {
+  font-size: 0.8em;
+  line-height: 0.5em;
+  background: rgb(182, 182, 182);
+}
+.docketAddress {
+  font-size: 0.5em;
+}
+.docketFooter {
+  margin-top: 1mm;
+  font-size: 0.5em;
+}
+#cheddrInvoice {
+  box-shadow: 0 0 1in -0.25in rgba(0, 0, 0, 0.5);
+  padding: 2mm;
+  margin: 0 auto;
+  width: 44mm;
+  background: #FFF;
+}
+#cheddrInvoice #cheddrInvoiceHeader, #cheddrInvoice #cheddrInvoiceSubHeader, #cheddrInvoice #cheddrInvoiceBody {
+  /* Targets all id with 'col-' */
+  border-bottom: 1px solid #EEE;
+}
+#cheddrInvoice #cheddrInvoiceHeader {
+  min-height: 5em;
+}
+#cheddrInvoice #cheddrInvoiceSubHeader {
+  min-height: 2em;
+}
+#cheddrInvoice #cheddrInvoiceBody {
+  min-height: 1em;
+}
+#cheddrInvoice #cheddrInvoiceHeader .logo {
+  height: 60px;
+  width: 60px;
+  background: url(../images/receiptLogo.png) no-repeat;
+  background-size: 60px 60px;
+}
+#cheddrInvoice .info {
+  display: block;
+  margin-left: 0;
+}
+#cheddrInvoice .invoiceItemList {
+  border-bottom: 1px solid #EEE;
+}
+#cheddrInvoice .item {
+  width: 32mm;
+}
+#cheddrInvoice #docketThankyou {
+  margin-top: 2mm;
+}
