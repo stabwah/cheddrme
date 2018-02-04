@@ -1,0 +1,28 @@
+{
+  "name": "htmlresponsivetemplates-rocket",
+  "version": "1.0.0",
+  "homepage": "http://htmlresponsivetemplates.com/project/rocket",
+  "description": "Free open-source Foundation 6 landing page template.",
+  "keywords": [
+    "foundation 6",
+    "theme",
+    "template",
+    "landing page",
+    "one page"
+  ],
+  "authors": [
+    "Mateusz Jerzyk"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "bower_components",
+    "index.html"
+  ],
+  "dependencies": {
+    "foundation-sites": "^6.2.3",
+    "lightbox2": "^2.8.2",
+    "jquery.easing": "^1.3.1",
+    "font-awesome": "fontawesome#^4.6.3"
+  }
+}

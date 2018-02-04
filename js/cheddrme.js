@@ -57,10 +57,10 @@ toastr.options = {
     "positionClass": "toast-top-left",
     "preventDuplicates": true,
     "onclick": null,
-    "showDuration": "300",
-    "hideDuration": "1000",
+    "showDuration": "150",
+    "hideDuration": "1500",
     "timeOut": "3000",
-    "extendedTimeOut": "1000",
+    "extendedTimeOut": "1500",
     "showEasing": "swing",
     "hideEasing": "linear",
     "showMethod": "fadeIn",
@@ -73,12 +73,13 @@ function showSplash() {
     updateFiatSymbol();  
     getExchRate(fiat); 
     
+    $("#donateModal").hide();
     $("#settingsModal").hide();
     resetOrderForm();
     $("#mainForm").hide();
     $("#menubar").hide();
-
     $("#cheddrFooter").show();    
+    $("#qrbch").hide();
 }
 
 function showMain() {
@@ -86,7 +87,9 @@ function showMain() {
     $("#menubar").show();
     $("#storeSplash").hide();
     $("#settingsModal").hide(); 
+    $("#donateModal").hide();
     $("#cheddrFooter").hide();
+    $("#qrbch").hide();
     updateScreen(0);
     resetOrderForm();
 }
@@ -94,7 +97,9 @@ function showMain() {
 function showSettings() {
     $("#storeSplash").hide();
     $("#settingsModal").show();
+    $("#donateModal").hide();
     $("#cheddrFooter").show();
+    $("#qrbch").hide();
 
     var checkSaved = localStorage.getItem("cheddrAddress");
     if (checkSaved != null) {
@@ -126,6 +131,25 @@ function resetOrderForm() {
     $("#paymentCode").empty();
     $("#itemList").show();
     updateTotals();
+}
+
+function orderPrint() {
+    $("#itemList").show();
+    $("#orderedItems").show();
+    $(".keypad").hide();
+    $("#paymentTitle").hide();
+    $("#paymentSummary").hide();
+    $("#menubar").hide();
+    $("#inputFields").hide();
+    $("#summaryQrCode").hide();
+    $("#summaryFeeRecommend").hide();
+    $("#summaryWaiter").hide();
+    $("#summaryWaiterText").hide();
+    $("#storeSplash").hide();
+    $("#settingsModal").hide(); 
+    $("#donateModal").hide();
+    $("#cheddrFooter").hide();
+    window.print();
 }
 
 updateSplashClock = function () {
@@ -326,7 +350,7 @@ checkTransaction = function (orderTotalBCH) {
 
         if (currentTotal >= expectedTotal) {
             // stop checking api
-            clearInterval(intervalTransCheck);
+            clearInterval(intervalRateLimit);
 
             totalToday += orderTotalBCH;
 
@@ -341,11 +365,10 @@ checkTransaction = function (orderTotalBCH) {
             setTimeout(
                 function() 
                 {
+                    // wait for tick animation
                     showSplash();
+                    // showReciept()
                 }, 950);
-            // showReciept()
-            // record_payment(address)
-            // unlock_address(address)
         } else {
             console.log("current:: " + currentTotal);
             console.log("expected:: " + expectedTotal);
@@ -363,7 +386,7 @@ updateScreen = function (displayValue) {
     $("#mainDisplay").val(display.substring(0, 10));
 };
 
-addItemToOrder = function() {
+addItemToOrder = function(itemName = "") {
     var itemPrice = parseFloat($("#mainDisplay").val()).toFixed(2);
     var itemPriceBCH = 0;
     if (itemPrice > 0) {       
@@ -379,7 +402,8 @@ addItemToOrder = function() {
         finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
 
         $("#orderedItems").append(
-        '<tr class="orderItem"><td><a href="#" class="deleteRow"><i class="fi-trash"></i></a></td><td class="orderPriceFiat">' +
+        '<tr class="orderItem"><td><a href="#" class="deleteRow"><i class="fi-trash"></i></a><a href="#" class="editRow">&nbsp;&nbsp;<i class="fi-pencil"></i></a>&nbsp;&nbsp;' + 
+        itemName + '</td><td class="orderPriceFiat">' +
         fiatSymbol + ' ' + itemPrice + '</td><td class="orderPriceBits">' + thousands(itemPriceBits) +
         '</td></tr>');
         $("#itemList").scrollTop($("#itemList")[0].scrollHeight);
@@ -413,6 +437,7 @@ updateTotals = function () {
         finalTotalFiat += parseFloat(orderPriceText);
     });
     $("#orderTotalFiat").text(fiatSymbol + finalTotalFiat.toFixed(2));
+    finalTotal = finalTotalFiat;
 
     finalTotalBCH = finalTotalBits / 1000000;
     $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');

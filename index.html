@@ -1,613 +1,216 @@
-<!doctype html>
-<html class="no-js" lang="en">
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>cheddr</title>
+    <meta charset="UTF-8">
+    <link href="css/landing.css" rel="stylesheet">
+    <link href="bower_components/foundation-sites/dist/foundation.min.css" rel="stylesheet">
+    <link href="bower_components/lightbox2/dist/css/lightbox.min.css" rel="stylesheet">
+    <link href="bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='https://fonts.googleapis.com/css?family=Fredoka+One|Squada+One|Montserrat+Alternates' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
 
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CHEDDR</title>
+    <h1>cheddr</h1>
 
-  <link rel="stylesheet" href="css/cheddrme.css" />
-  <link rel="stylesheet" href="css/foundation.css" />
-  <link rel="stylesheet" href="css/foundation-icons.css" />
-  <link rel="stylesheet" href="css/toastr.min.css" />
-
-  <script type="text/javascript" src="js/jquery.js"></script>
-  <script type="text/javascript" src="js/foundation.min.js"></script>
-  <script type="text/javascript" src="js/toastr.min.js"></script>
-  <script type="text/javascript" src="js/kjua-0.1.1.min.js"></script>
-  <script type="text/javascript" src="js/bchaddrjs-0.1.4.js"></script>
-  <script type="text/javascript" src="js/cheddrme.js"></script>
-
-  <!--
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.min.js"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/kjua@0.1.2/dist/kjua.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
-  -->
-
-  <script type="text/javascript">
-    var paymentAddress = "";
-    var fiat = "AUD";
-
-    var currentExchangeRate = 0;
-    var transFee = 0;
-
-    var transFeeBCH = 0.00000681;
-    var transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
-
-    var subTotal = 0;
-    var finalTotal = 0;
-
-    var subTotalBits = 0;
-    var finalTotalBits = 0;
-
-    var subTotalBCH = 0;
-    var finalTotalBCH = 0;
-
-    var result = 0;
-    var currentEntry = "0";
-
-    var intervalTransCheck = "";
-
-    $(document).ready(function () {
-      var checkSaved = localStorage.getItem("cheddrAddress");
-      var checkFiat = localStorage.getItem("cheddrFiat");
-      var checkStore = localStorage.getItem("cheddrStoreName");
-
-      if (checkFiat != null) {
-        fiat = checkFiat;
-      }
-
-      if (checkSaved != null) {
-        // found saved address, skip setup
-        paymentAddress = checkSaved;
-        if (checkStore != null) {
-          $("#inputStoreName").text(checkStore);
-          $("#splashStoreName").text(checkStore);
-          var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
-          $("#blockchainExplorerLink").attr("href", blockExplorerUrl);
-        }
-        showSplash();
-      } else {
-        // first-timer
-        showSettings();
-        $("#cancelSettings").hide();
-      }
-
-      /* start splash */
-      $("#refreshCog").click(function () {
-        // wipe saved settings??
-      });
-
-      $("#sideSettingsCog").click(function () {
-        $("#cancelSettings").show();
-        showSettings();
-      });
-
-      $("#settingsCog").click(function () {
-        $("#cancelSettings").show();
-        showSettings();
-      });
-
-      $("#splashNewPayment").click(function () {
-        // check last update time getExchRate(fiat);
-        showMain();
-      });
-      /* end splash */
-
-      /* start settings */
-      $("#cancelSettings").click(function () {
-        showSplash();
-      });
-
-      $("#clearPaymentAddress").click(function () {
-        paymentAddress = "";
-        $("#inputAddress").val("");
-        toastr.error("Removed recieve address");
-      });
-
-      $("#saveSettings").click(function () {
-        // check recieve address has been added
-        var newAddress = $("#inputAddress").val();
-        localStorage.removeItem("cheddrAddress");
-        if(newAddress.length > 1) {
-          
-          var Format = bchaddr.Format;
-          var Network = bchaddr.Network;
-          var Type = bchaddr.Type;
-          var isLegacyAddress = bchaddr.isLegacyAddress;
-          var isBitpayAddress = bchaddr.isBitpayAddress;
-          var isCashAddress = bchaddr.isCashAddress;
-          var toCashAddress = bchaddr.toCashAddress;
-
-          var newAddress = $("#inputAddress").val();
-          if (newAddress.substring(0, 12) === "bitcoincash:") {
-              newAddress = newAddress.replace("bitcoincash:", '');
-          }
-          var validAddress = 0;
-
-          try {
-              if (isLegacyAddress(newAddress)) {
-                  validAddress = 1;
-                  toastr.warning("Converting Legacy address...");
-              }
-              if (isBitpayAddress(newAddress)) {
-                  validAddress = 1;
-                  toastr.warning("Converting BitPay address...");
-              }
-              if (isCashAddress(newAddress)) {
-              validAddress = 1;
-              }
-          } catch (e) {
-              toastr.error("Invalid address");
-              showSettings();
-          }
-
-          if (validAddress === 1) {
-              var cashaddr = toCashAddress(newAddress);
-              // add bitcoincash: prefix if not found
-              if (cashaddr.substring(0, 11) != "bitcoincash") {
-                  cashaddr = 'bitcoincash:' + cashaddr;
-              }
-
-              if (paymentAddress != cashaddr) {
-                  paymentAddress = cashaddr;
-                  $("#inputAddress").val(cashaddr);
-                  localStorage.setItem("cheddrAddress",cashaddr);
-              /*
-                  '<div><span class="addedAddress">' +  +
-                  '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>'
-              );*/
-                  toastr.success("Recieve address added");
-              } else {
-                  toastr.error("This address already exists");
-              }
-              var storeName = $("#inputStoreName").val();
-              if (storeName != null) {
-                $("#splashStoreName").text(storeName);
-                localStorage.setItem("cheddrStoreName",storeName);
-              }
-              var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
-              $("#blockchainExplorerLink").attr("href", blockExplorerUrl);
-              showSplash();
-          }
-        } else {
-          toastr.error("No recieve address")
-        }
-      });
-
-      $("select").on("change", function () {
-        fiat = this.value;
-        $("#displayFiat").text(fiat);
-        updateFiatSymbol();
-        resetOrderForm();
-        $("#displayFiat").text(fiat);
-        toastr.info("Switched currency to " + fiat);
-        getExchRate(fiat);
-      });
-      /* end settings */
-
-      /* start input */
-      $("#backToSplash").click(function () {
-        showSplash();
-      });
-
-      $("#clearInput").click(function () {
-        updateScreen(0);
-      });
-
-      $(document).on("click", "a.removeAddress", function () {
-        $($(this).closest("div")).remove();
-        toastr.info("Recieve address removed");
-        return false;
-      });
-
-      // remove from order
-      $(document).on("click", "a.deleteRow", function () {
-        $($(this).closest("tr")).remove();
-        updateTotals();
-        return false;
-      });
-
-      // keypad input
-      $(".keypad").click(function (evt) {
-        var buttonPressed = $(this).html();
-        if (buttonPressed === ".") {
-          currentEntry += ".";
-        } else if (isNumber(buttonPressed)) {
-          if (currentEntry === "0") currentEntry = buttonPressed;
-          else currentEntry += buttonPressed;
-        } else {
-          currentEntry = "";
-        }
-        updateScreen(currentEntry);
-      });
-      /* end input */
-
-      // add to order
-      $("#addToOrder").click(function() {
-        addItemToOrder();
-      });
-
-      // check out
-      $("#orderCheckout").click(function () {
-        $("#addToOrder").click();
-        if (finalTotal > 0) {
-          $("#paymentSummary").show();
-          $("#itemList").hide();
-          var specificAmount = paymentAddress + '?amount=' + parseFloat(finalTotalBCH).toFixed(8);
-          var qrcode = kjua({
-            text: specificAmount,
-            ecLevel: 'H',
-            size: 177,
-            rounded: 100,
-            quiet: 0,
-            mSize: 26,
-            mPosX: 50,
-            mPosY: 50
-          });
-          if ($("#paymentCode").is(':empty')) {
-            $("#paymentTitle").empty();
-            $("#paymentTitle").append('Please transfer <span class="success label finalTotal">₿' +
-              parseFloat(finalTotalBCH).toFixed(8) + '</span> to:');
-            $("#paymentCode").append(qrcode);
-            $("#paymentAddress").val(paymentAddress);
-            getInitials();
-          }
-        } else {
-          toastr.error('No items to checkout');
-        }
-      });
-
-      /* start order summary */
-      $("#orderCancel").click(function () {
-        $("#itemList").show();
-        $("#paymentSummary").hide();
-        $("#paymentCode").empty();
-      });
-
-      $("#orderDone").click(function () {
-        var checkLoop = 0;
-        $("#summaryQrCode").hide();
-        $("#summaryFeeRecommend").hide();
-        $("#summaryWaiter").show();
-        $("#summaryWaiterText").show();
-
-        $("#orderCancel").hide();
-        $("#orderDone").hide();     
-
-        intervalTransCheck = setInterval(function () { 
-        checkTransaction(finalTotalBCH);
-
-        console.log("retry:: " + checkLoop);
-        if (++checkLoop === 4) {
-            toastr.warning("Could not confirm transaction")
-            clearInterval(intervalTransCheck);
-
-            $("#summaryWaiter").hide();
-            $("#summaryWaiterText").hide();
-            $("#summaryQrCode").show();
-            $("#summaryFeeRecommend").show();
-            $("#orderCancel").show();
-            $("#orderDone").show();     
-        }
-        }, 3000);
-      });
-
-      $("#copyPaymentAddress").click(function () {
-        copyToClipboard(document.getElementById("paymentAddress"));
-        toastr.success("Address copied to clipboard")
-      });
-      /* end order summary */
-    });
-  </script>
-</head>
-
-<body>
-    <br/>
-    <!-- side menu -->
-    <div class="row align-center medium-unstack medium-4 large-4 text-center" id="menubar">
-       <div style="position:absolute;left:5%;top:2%;">
-         <a href="#" id="sideSettingsCog">
-           <i class="fi-widget settings">&nbsp;</i>
-         </a>
-         <br/>
-         <!-- <a href="#" id="refresh"><i class="fi-refresh settings">&nbsp;</i></a><br/> -->
-         <a href="#" id="backToSplash">
-           <i class="fi-arrow-left settings">&nbsp;</i>
-         </a>
-         <br/>
-       </div>
-     </div>
-     <!-- side menu -->
-     
-  <!-- store splash -->
-  <div class="row align-center medium-unstack medium-4 large-4 text-center" id="storeSplash">
-    <div class="store-profile">
-      <img class="store-profile-img" src="./images/backdrop.jpg" alt="picture of space" />
-
-      <div style="position:absolute;left:5%;top:2%;">
-        <p id="splashRate" class="splash">42</p>
+    <header>
+      <div class="title-bar" data-responsive-toggle="example-menu" data-hide-for="medium">
+	<button class="menu-icon" type="button" data-toggle></button>
+	<div class="title-bar-title">Menu</div>
       </div>
 
-      <div style="position:absolute;left:80%;top:2%;" id="blockchainExplorer">
-          <a href="#" id="blockchainExplorerLink" target="_blank"><i class="fi-clipboard-notes settings">&nbsp;</i></a>
+      <nav div class="top-bar" id="example-menu">
+	<h2>Menu</h2>
+	<div class="top-bar-left">
+	  <ul class="menu">
+	    <li class="menu-text"><img src="images/cheese.png" width="32px"></li>
+	  </ul>
+	</div>
+	<div class="top-bar-right">
+	  <ul class="menu">
+	    <li><a class="nav-link page-scroll" href="launch.html"><button class="medium button success">LAUNCH!</button></a></li>
+	    <li><a class="nav-link page-scroll" href="#landingLetsGo">Experience</a></li>
+	    <li><a class="nav-link page-scroll" href="#landingAbout">About</a></li>
+	    <li><a class="nav-link page-scroll" href="#pricing">Get Started</a></li>
+	    <li><a class="nav-link page-scroll" href="#landingResources">Resources</a></li>
+	    <li><a class="nav-link page-scroll" href="#landingDonate">Donate</a></li>
+	  </ul>
+	</div>
+      </nav>
+
+      <div class="row page-title">
+	<h4>Take Back Control</h4>
+	<p><a href="launch.html"><img src="images/cheese.png"></a></p>
+	<p><h2>cheddr</h2></p>
+	<p>Unleash instant global payments using the Bitcoin Cash network<br/>
+	  Connect directly to with your customers anywhere in the world with incredibly low fees!</p>
+	<span>Try the free Bitcoin Cash Point of Sale system that runs entirely in your browser now!</span>
       </div>
+    </header>
 
-      <div style="position:absolute;left:90%;top:2%;">
-        <a href="#" id="settingsCog"><i class="fi-widget settings">&nbsp;</i></a>
+    <section class="landingSpacer">&nbsp;</section>
+
+    <section id="landingLetsGo">
+      <div class="row">
+	<div class="large-10 large-offset-1 columns stats">
+	  <h4>Let's Go</h4>
+	  <p>Start accepting Bitcoin Cash today with cheddr Point of Sale!<br/>
+	    Runs in any modern browser - no installation required!<br/>
+	    Bitcoin Cash 0-conf is 200% faster than Visa<br/></p>
+	  <div class="row">
+	    <div class="medium-4 columns single-stat">
+	      <span><i class="fa fa-globe"></i></span>
+	      <p>Send money globally</p>
+	      <br/>
+	      <p>Your transaction reaches 99.8% of the network in under 2 seconds</p>
+	    </div>
+	    <div class="medium-4 columns single-stat">
+	      <span><i class="fa fa-bolt"></i></span>
+	      <p>Lightning fast payments</p>
+	      <br/>
+	      <p>All transactions are settled in 6 blocks (60 minutes not 60 days)</p>
+	    </div>
+	    <div class="medium-4 columns single-stat">
+	      <span><i class="fa fa-cart-arrow-down"></i></span>
+	      <p>Super low fees</p>
+	      <br/>
+	      <p>Merchants pay far lower transaction fees than today's payment systems</p>
+	    </div>
+	  </div>
+	</div>
       </div>
+    </section>
 
-      <div style="position:absolute; top:20%; margin-left: auto; margin-right: auto; width: 100%;">
-        <div class="clockContainer">
-          <div id="clockDisplayDate"></div>
-          <ul>
-            <li id="clockDisplayH"> </li>
-            <li id="clockDisplay">:</li>
-            <li id="clockDisplayM"> </li>
-          </ul>
-        </div>
+    <section class="landingSpacer">&nbsp;</section>
+
+    <section id="landingAbout">
+      <h2>About</h2>
+      <div class="row row small-up-2 medium-up-2 hero">
+	<div class="column hero-content">
+	  <h4>Free, Fast, Safe & Easy</h4>
+	  <p>Cheddr was made to help individuals and small businesses looking to accept Bitcoin Cash transactions.
+	    Most payments are completed within 2 seconds - 200% faster than Visa!
+	    To avoid trusting third-parties, cheddr runs completely in your browser.
+	    No private information is ever stored or transmitted!
+	  </p>
+	</div>
+	<div class="column hero-img">
+	  <div class="media-object-section">
+	    <img src="images/rocket-found.png" alt="rocket found">
+	  </div>
+	</div>
       </div>
+    </section>
 
-      <div class="store-profile-content card-section">
-        <div class="store-profile-avatar">
-            <a href="https://www.bitcoincash.org" target="_blank"><img src="./images/bchlogo256.png"/></a>
-        </div>
-
-        <p class="splashStoreName" id="splashStoreName"></p>
-        <p id="splashStatus"></p>
-
-        <p class="store-profile-info" id="splashStatusDate">Stack cheddars forever, live treacherous, all the et ceteras</p>
+    <section id="pricing">
+      <h2>Get Started</h2>
+      <div class="row align-center text-center">
+	<div class="large-4 medium-4 align-center columns pricing-table active-table">&nbsp;</div>
+	<div class="large-4 medium-4 align-center columns pricing-table active-table">
+	  <div class="table-header"><p>START NOW!</p></div>
+	  <ul class="offer-list align-center">
+	    <li>Lightning Fast Payments</li><hr>
+	    <li>No Servers Required</li><hr>
+	    <li>Multiple Fiat Currencies</li><hr>
+	    <li>CashAddr Support</li><hr>
+	    <li>QR Codes with Total Amount</li><hr>
+	    <li class="price"><span>FREE!</span></li>
+	    <li><a class="large success button" href="launch.html">LAUNCH!</a></li>
+	  </ul>
+	</div>
+	<div class="large-4 medium-4 align-center columns pricing-table active-table">&nbsp;</div>
       </div>
+    </section>
 
-      <div class="store-profile-actions">
-        <a href="#" class="store-profile-button button success" id="splashNewPayment">New Payment</a>
-      </div>
+    <section id="landingResources">
+      <h2>Resources</h2>
+      <p>Useful educational and marketing material for vendors and users coming soon</p>
+      Accept Bitcoin Cash Initiative https://acceptbitcoin.cash/
+
+      Logos https://bitcoinlogo.eu/
+      Stickers and posters https://github.com/theantnest/Bitcoin-Cash-Green-Art
+      Updated Bitcoin Cash design https://github.com/wilsonwastaken/BCH-design
+
+      Buy and sell Bitcoin Cash locally https://localbitcoincash.org/
+      Bitcoin Cash ATMs near you https://coinatmradar.com/
+
+      Educational Videos:
+      What is Bitcoin Cash - https://www.youtube.com/watch?v=jduVN643Prc
+
+      Bitcoin Cash Wallets
+      Paper wallet https://cashaddress.org/
+
+      Electron-Cash https://electroncash.org/
+
+      Coinomi
+      Bitcoin.com https://wallet.bitcoin.com/
+      Unit https://www.unitwallet.co/
+      Stash https://stashcrypto.com/
+      BitPay https://bitpay.com/wallet
+      CoPay https://copay.io/
+
+      KeepKey https://www.keepkey.com/
+</p>
+</section>
+
+<section class="landingSpacer">&nbsp;</section>
+
+<section id="landingDonate">
+  <h2>Donate</h2>
+  <p>Please consider making a donation to help support continued development.</p>
+  <p>Feel free to leave a note in the label of your transaction</p>
+  <p><img src="./images/donateQr.png" width="200">
+    <section style="word-wrap: break-word;">bitcoincash:qze4dyv6znt5h22dxqsejvfn47tz2ermeg62y4cdg6</section></p>
+  <p>We gratefully accept bug reports, feature requests and contributions on github</p>
+</section>
+
+<section class="landingSpacer">&nbsp;</section>
+
+<footer>
+  <div class="row expanded callout secondary">
+    <div class="large-4 columns"><p>&nbsp;</p></div>
+    <div class="large-4 columns social-media">
+      <a href="#">
+	<a href="https://github.com/stabwah/cheddrme/" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+      </a>
+      <a href="#">
+	<a href="https://www.reddit.com/r/btc/" target="_blank"><i class="fa fa-reddit" aria-hidden="true"></i></a>
+      </a>
     </div>
+    <div class="large-4 columns"><p>&nbsp;</p></div>
   </div>
-  <!-- end store splash -->
 
-  <!-- main form -->
-  <div class="row align-center medium-unstack medium-8 large-8 text-center" id="mainForm">
-    <div class="medium-4 large-4 columns callout text-center">
+  <section class="landingSpacer">&nbsp;</section>
 
-      <h2><i class="fi-bitcoin-circle gly-rotate-30"></i> CHEDDR</h2>
-
-      <hr>
-      <div class="large-12 medium-12 columns">
-        <div class="input-group">
-          <span id="fiatSymbol" class="input-group-label"></span>
-          <input class="input-group-field" type="text" id="mainDisplay"/>
-        </div>
-      </div>
-
-      <hr>
-      <section>
-        <div class="expanded button-group">
-          <a class="hollow button keypad">7</a>
-          <a class="hollow button keypad">8</a>
-          <a class="hollow button keypad">9</a>
-        </div>
-
-        <div class="expanded button-group">
-          <a class="hollow button keypad">4</a>
-          <a class="hollow button keypad">5</a>
-          <a class="hollow button keypad">6</a>
-        </div>
-
-        <div class="expanded button-group">
-          <a class="hollow button keypad">1</a>
-          <a class="hollow button keypad">2</a>
-          <a class="hollow button keypad">3</a>
-        </div>
-
-        <div class="expanded button-group">
-          <a class="hollow secondary button keypad">.</a>
-          <a class="hollow button keypad">0</a>
-          <a class="hollow success button" id="addToOrder">
-            <i class="fi-plus"></i>
-          </a>
-        </div>
-
-        <div class="expanded button-group">
-          <a class="warning button" id="clearInput">
-            <i class="fi-refresh"></i>
-          </a>
-
-          <a class="success button" id="orderCheckout">
-            <i class="fi-shopping-cart"></i>
-          </a>
-        </div>
-      </section>
-
-      <hr>
-    </div>
-    <!-- end main form -->
-
-    <!-- payment summary -->
-    <div class="large-7 medium-7 columns text-center" id="paymentSummary">
-      <div class="callout">
-        <h5>Checkout</h5>
-        <hr>
-        <p id="paymentTitle"></p>
-        <div class="input-group">
-          <input class="input-group-field" type="text" id="paymentAddress">
-          <div class="input-group-button">
-            <button class="button" id="copyPaymentAddress" data-clipboard-target="#paymentAddress"><i class="fi-page-copy"></i></button>
-          </div>
-        </div>
-
-        <!-- loading check -->
-        <div id="summaryWaiter"><br/>
-            <div class="circle-loader">
-              <div class="checkmark draw"></div>
-            </div>
-          </div>
-          
-        <div id="summaryQrCode">
-          <p>or scan QR Code:</p>
-          <p id="paymentCode"></p>
-        </div>
-        <div id="summaryFeeRecommend">
-          <span id="transactionFee"></span>
-          <span class="warning round radius label" id="transFeeRecommended"></span> bits per kilobyte
-        </div>
-        <hr>
-        <div>
-          <a class="alert large-2 button" id="orderCancel">
-            <i class="fi-x"></i>
-          </a>
-          <a class="success large-2 button" id="orderDone">
-            <i class="fi-check"></i>
-          </a>
-          <div id="summaryWaiterText">Looking for transaction...<br/><br/></div>
-        </div>
-
-      </div>
-    </div>
-    <!-- end payment summary -->
-
-    <!-- order summary -->
-    <div class="large-8 columns" id="itemList" style="height: 31em; overflow-y: auto; overflow-x: hidden;">
-      <table width="80%" class="hover">
-        <thead>
-          <tr>
-            <th class="text-center">Item</th>
-            <th id="displayFiat" class="text-center"></th>
-            <th class="text-center">bits (µBCH)</th>
-          </tr>
-        </thead>
-        <tbody id="orderedItems">
-        </tbody>
-      </table>
-    </div>
-    <!-- end order summary -->
-
-    <hr>
-
-    <!-- totals -->
-    <div class="large-8 columns">
-      <div id="orderTotal">
-        <div class="medium-5 large-5 columns">
-          <section>
-            <h2 class="orderTotal">Total</h2>
-          </section>
-        </div>
-        <div class="medium-3 large-3 columns">
-          <section style="padding-top: 15px;">
-            <h4 class="orderTotal" id="orderTotalFiat">&nbsp;</h4>
-          </section>
-        </div>
-        <div class="medium-4 large-4 columns">
-          <section>
-            <h2 class="orderTotal" id="orderTotalBits">&nbsp;</h2>
-          </section>
-          <section>
-            <h4 class="orderTotal" id="orderTotalBCH"></h4>
-          </section>
-        </div>
-      </div>
-    </div>
+  <div class="row expanded copyright">
+    <div class="medium-12 columns">
+      <p>cheddr pos 0.2 alpha</p></div>
   </div>
-  <!-- end totals -->
+</footer>
 
-   <!-- start settings -->
-   <div class="row align-center medium-unstack medium-5 large-5 text-center" id="settingsModal">
-      <div class="callout">
-        <h5><i class="fi-widget">&nbsp;</i>Settings</h5>
-  
-        <hr>
-  
-        <label>Store Name
-          <div class="input-group">
-            <span class="input-group-label">
-              <i class="fi-flag"></i>
-            </span>
-            <input id="inputStoreName" class="input-group-field" type="text" placeholder="Your Store Name (Optional)">
-          </div>
-        </label>
-  
-        <label>Recieve Address
-          <div id="myAddresses" class="text-center"></div>
-  
-          <div class="input-group">
-              <span class="input-group-label"><i class="fi-key"></i></span>
-              <input id="inputAddress" class="input-group-field" type="text" placeholder="Add recieve address">
-              <div class="input-group-button">
-                  <input type="submit" class="button" value="-" id="clearPaymentAddress">
-              </div>
-            </div>          
-        </label>
-  
-        <label>Local Currency<br/>
-          <select style="width: 10em;">
-            <option selected="selected" value="AUD">AUD</option>
-            <option value="BRL">BRL</option>
-            <option value="CAD">CAD</option>
-            <option value="CHF">CHF</option>
-            <option value="CLP">CLP</option>
-            <option value="CNY">CNY</option>
-            <option value="CZK">CZK</option>
-            <option value="DKK">DKK</option>
-            <option value="EUR">EUR</option>
-            <option value="GBP">GBP</option>
-            <option value="HKD">HKD</option>
-            <option value="HUF">HUF</option>
-            <option value="IDR">IDR</option>
-            <option value="ILS">ILS</option>
-            <option value="INR">INR</option>
-            <option value="JPY">JPY</option>
-            <option value="KRW">KRW</option>
-            <option value="MXN">MXN</option>
-            <option value="MYR">MYR</option>
-            <option value="NOK">NOK</option>
-            <option value="NZD">NZD</option>
-            <option value="PHP">PHP</option>
-            <option value="PKR">PKR</option>
-            <option value="PLN">PLN</option>
-            <option value="USD">USD</option>
-            <option value="RUB">RUB</option>
-            <option value="SEK">SEK</option>
-            <option value="SGD">SGD</option>
-            <option value="THB">THB</option>
-            <option value="TRY">TRY</option>
-            <option value="TWD">TWD</option>
-            <option value="ZAR">ZAR</option>
-          </select>
-        </label>
-        <hr>
-  
-        <div class="input-group-button">
-        <a class="button warning hollow" id="cancelSettings">
-          <i class="fi-prohibited"></i>
-        </a>
-        <a class="button success" id="saveSettings">
-          <i class="fi-check"></i>
-        </a>
-      </div>
-  
-      </div>
-    </div>
-  <!-- end settings -->
-
- <!-- start footer -->
- <div id="cheddrFooter" class="row align-center medium-unstack medium-2 large-2 text-center">
-    <br/><br/><br/><br/>
-    <div class="medium-6 large-6 columns text-center">
-        <section>
-            <a href=""><img src="./images/main_ico_donate.png" alt="Donate" height="32px" width="32px"></a>
-        </section>
-    </div>
-    <div class="medium-6 large-6 columns text-center">
-        <section>
-            <a href="https://github.com/stabwah/cheddrme" target="_blank"><img src="./images/main_ico_github.png" alt="GitHub" height="32px" width="32px"></a>
-        </section>
-    </div>
-</div>
-<!-- end footer -->  
+<!-- jQuery -->
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<script src="bower_components/jquery.easing/js/jquery.easing.min.js"></script>
+<!-- Lightbox JS -->
+<script src="bower_components/lightbox2/dist/js/lightbox.min.js"></script>
+<!-- Foundation JS -->
+<script src="bower_components/foundation-sites/dist/foundation.min.js"></script>
 
 
 </body>
 </html>
+
+<!--#1 problem z h2 w <article> tresc strony nie jest wysrodkowana-->
+
+<script type="text/javascript">
+  $(document).ready(function () {
+  $(document).foundation();
+  $('body').on('click', 'a.page-scroll', function(event) {
+  var $anchor = $(this);
+  $('html, body').stop().animate({
+  scrollTop: $($anchor.attr('href')).offset().top
+  }, 1500, 'easeInOutExpo');
+  event.preventDefault();
+  });
+  });
+  </script>

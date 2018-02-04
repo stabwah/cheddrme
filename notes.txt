@@ -1,6 +1,30 @@
 BCH API: https://bch.btc.com/api-doc
 
 TODO:
-    rotate recieve addresses
-    calculate transaction fee 
-	
+    - rate limit 
+
+    - printing:
+        open new page with invoice:
+        https://codepen.io/Sambra22/pen/JNexJP
+        https://github.com/sparksuite/simple-html-invoice-template
+        
+            var printPopup = window.open('', "Reciept", "menubar=0,location=0,height=800,width=400");
+            printPopup.write();
+            printPopup.focus();
+            setTimeout(function () { window.print(); }, 500);
+            window.onfocus = function () { setTimeout(function () { window.close(); }, 500); }
+
+        generate unique reciepts numbers: 
+            //  RFC4122 version 4 compliant UUID
+            function uuidv4() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            })
+
+    - rotate recieve addresses
+
+    - calculate recommended transaction fee 
+
+    - find local currency by html5 geolocation:
+    https://coliff.github.io/geoip-db-country-select/

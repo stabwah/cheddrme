@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>cheddr pos</title>
+      <link rel="stylesheet" href="css/cheddrReceiptPrint.css">
+</head>
+
+<body>  
+  <div id="cheddrInvoice">
+
+    <center id="cheddrInvoiceHeader">
+      <div class="logo"></div>
+      <div class="info"> 
+        <h2>Store Name</h2>
+      </div>
+		</center>
+		<!-- end invoice header -->
+		<hr>
+    
+    <div id="cheddrInvoiceSubHeader">
+      <div class="info">
+        <p>
+						b29d98fa-b68a-4e05-81b0-98a00c440c25<br/>
+            01/02/2018 13:33
+        </p>
+      </div>
+		</div>
+		<!-- end invoice store info --><br/>
+		
+    <div id="cheddrInvoiceBody">
+					<div id="table">
+						<table>
+							<tr class="invoiceTitle">
+								<td class="itemHeader"><h2>Item</h2></td>
+								<td class="fiatHeader"><h2>Price ($)</h2></td>
+								<td class="bitsHeader"><h2>Price (bits)</h2></td>
+							</tr>
+
+							<tr class="invoiceItemList">
+								<td class="itemName">Cheese Burger</td>
+								<td class="itemPriceFiat">5.50</td>
+								<td class="itemPriceBits">3,427.22</td>
+							</tr>
+
+							<tr class="invoiceItemList">
+								<td class="itemName">Milk Shake</td>
+								<td class="itemPriceFiat">3.00</td>
+								<td class="itemPriceBits">1,869.39</td>
+							</tr>
+
+							<tr class="invoiceItemList">
+								<td class="itemName">Diesel 40L</td>
+								<td class="itemPriceFiat">60.00</td>
+								<td class="itemPriceBits">37,387.81</td>
+							</tr>
+
+							<tr class="invoiceItemList">
+								<td class="itemName">Lighter</td>
+								<td class="itemPriceFiat">1.00</td>
+								<td class="itemPriceBits">623.13</td>
+							</tr>
+
+							<tr class="invoiceSubTotal">
+								<td>Sales Tax 10%</td>
+								<td class="taxFiat"><h2>6.95</h2></td>
+								<td class="taxBits"><h2>4,330.75</h2></td>
+							</tr>
+
+							<tr class="invoiceTotal">
+								<td>Total</td>
+								<td class="totalFiat"><h2>76.45</h2></td>
+								<td class="totalBits"><h2>47,638.30</h2></td>
+							</tr>
+						</table>
+					</div>
+					<!-- end item table -->
+
+					<div id="docketThankyou">
+							<p class="docketThankyou"><strong>Thanks for your purchase!</strong></p>
+						</div>
+					<hr>	
+					<div class="totalBCH"><img src="images/bchlogoprint.png" height="64px"><h2>₿0.04763830</h2></div>
+					<div class="docketFooter">Sent To:</div>
+					<div class="docketAddress">bitcoincash:qze4dyv6znt5h22dxqsejvfn47tz2ermeg62y4cdg6</div>
+				</div>
+				<hr>
+				<div class="docketFooter">
+				cheddr pos 0.2 alpha<br/>
+				https://pos.cheddr.cash<br/>
+				Proudly powered by Bitcoin Cash</div>
+	</div>
+</body>
+</html>
