@@ -1,21 +1,7 @@
 BCH API: https://bch.btc.com/api-doc
 
 TODO:
-    - rate limit (59 seconds total)
-    var intervalRateLimit;
-    var rateLimit = 2000;
-    var rateLimitAttempts = 1;
-
-    intervalRateLimit = setInterval(function () {  
-        if (rateLimitAttempts <= 5) {
-            rateLimitAttempts += 1;
-            // checkTrans();
-            rateLimit += 3000;
-        } else {
-            // stop re-trying
-            clearInterval(intervalRateLimit);
-        }
-    }, rateLimit);
+    - rate limit 
 
     - printing:
         open new page with invoice:
@@ -40,5 +26,5 @@ TODO:
 
     - calculate recommended transaction fee 
 
-    - find currency by html5 geolocation:
+    - find local currency by html5 geolocation:
     https://coliff.github.io/geoip-db-country-select/

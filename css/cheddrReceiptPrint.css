@@ -107,10 +107,10 @@ hr {
   min-height: 1em;
 }
 #cheddrInvoice #cheddrInvoiceHeader .logo {
-  height: 60px;
-  width: 60px;
+  height: 120px;
+  width: 120px;
   background: url(../images/receiptLogo.png) no-repeat;
-  background-size: 60px 60px;
+  background-size: 120px 120px;
 }
 #cheddrInvoice .info {
   display: block;

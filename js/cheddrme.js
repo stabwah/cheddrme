@@ -57,10 +57,10 @@ toastr.options = {
     "positionClass": "toast-top-left",
     "preventDuplicates": true,
     "onclick": null,
-    "showDuration": "300",
-    "hideDuration": "1000",
+    "showDuration": "150",
+    "hideDuration": "1500",
     "timeOut": "3000",
-    "extendedTimeOut": "1000",
+    "extendedTimeOut": "1500",
     "showEasing": "swing",
     "hideEasing": "linear",
     "showMethod": "fadeIn",
@@ -350,7 +350,7 @@ checkTransaction = function (orderTotalBCH) {
 
         if (currentTotal >= expectedTotal) {
             // stop checking api
-            clearInterval(intervalTransCheck);
+            clearInterval(intervalRateLimit);
 
             totalToday += orderTotalBCH;
 
@@ -365,11 +365,10 @@ checkTransaction = function (orderTotalBCH) {
             setTimeout(
                 function() 
                 {
+                    // wait for tick animation
                     showSplash();
+                    // showReciept()
                 }, 950);
-            // showReciept()
-            // record_payment(address)
-            // unlock_address(address)
         } else {
             console.log("current:: " + currentTotal);
             console.log("expected:: " + expectedTotal);

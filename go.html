@@ -322,22 +322,25 @@
         $("#orderCancel").hide();
         $("#orderDone").hide();     
 
-        intervalTransCheck = setInterval(function () { 
-        checkTransaction(finalTotalBCH);
+        var rateLimitAttempts = 0;
+        intervalRateLimit = setInterval(function () {
+          if (rateLimitAttempts < 5) { 
+              rateLimitAttempts += 1;
+              console.log("retry:: " + rateLimitAttempts);
+              checkTransaction(finalTotalBCH);
+              } else {
+                // stop re-trying
+                clearInterval(intervalRateLimit);
+                toastr.warning("Could not confirm transaction")
 
-        console.log("retry:: " + checkLoop);
-        if (++checkLoop === 3) {
-            toastr.warning("Could not confirm transaction")
-            clearInterval(intervalTransCheck);
-
-            $("#summaryWaiter").hide();
-            $("#summaryWaiterText").hide();
-            $("#summaryQrCode").show();
-            $("#summaryFeeRecommend").show();
-            $("#orderCancel").show();
-            $("#orderDone").show();     
-        }
-        }, 3000);
+                $("#summaryWaiter").hide();
+                $("#summaryWaiterText").hide();
+                $("#summaryQrCode").show();
+                $("#summaryFeeRecommend").show();
+                $("#orderCancel").show();
+                $("#orderDone").show();     
+          }
+        }, 2500);
       });
 
       $("#copyPaymentAddress").click(function () {
@@ -653,7 +656,7 @@
 
  <!-- start footer -->
  <div id="cheddrFooter" class="row align-center medium-unstack medium-2 large-2 text-center">
-    <br/><br/>cheddr pos 0.0.1a<hr>
+    <br/><br/>cheddr pos 0.2a<hr>
     <div class="medium-12 large-12 medium-unstack align-center columns text-center">
         <section>
             <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Donate!"><a href="#donateModal" rel="modal:open"><img src="./images/main_ico_donate.png" id="showDonate" alt="Donate" width="38px"></a></span>
