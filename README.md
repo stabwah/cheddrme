@@ -30,9 +30,9 @@ Bitcoin Cash intends to make zero-conf as safe and reliable as it used to be bef
 
 # Notes
 
-Cheddr only currently supports one recieve address at a time however I never encountered issues as long as you aren't trying to use multiple tabs at once.
+Cheddr only currently supports one receive address at a time however I never encountered issues as long as you aren't trying to use multiple tabs at once.
 
-For vendors requiring multiple checkouts, I recommend generating a unique recieve address for each point of sale location.
+For vendors requiring multiple checkouts, I recommend generating a unique receive address for each point of sale location.
 
 Exchange rates are taken from api.coinmarketcap.com - the updates are limited to once every 5 minutes.
 
