@@ -387,7 +387,7 @@ updateScreen = function (displayValue) {
     $("#mainDisplay").val(display.substring(0, 10));
 };
 
-addItemToOrder = function() {
+addItemToOrder = function(itemName = "") {
     var itemPrice = parseFloat($("#mainDisplay").val()).toFixed(2);
     var itemPriceBCH = 0;
     if (itemPrice > 0) {       
@@ -403,7 +403,8 @@ addItemToOrder = function() {
         finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
 
         $("#orderedItems").append(
-        '<tr class="orderItem"><td><a href="#" class="deleteRow"><i class="fi-trash"></i></a></td><td class="orderPriceFiat">' +
+        '<tr class="orderItem"><td><a href="#" class="deleteRow"><i class="fi-trash"></i></a><a href="#" class="editRow">&nbsp;&nbsp;<i class="fi-pencil"></i></a>&nbsp;&nbsp;' + 
+        itemName + '</td><td class="orderPriceFiat">' +
         fiatSymbol + ' ' + itemPrice + '</td><td class="orderPriceBits">' + thousands(itemPriceBits) +
         '</td></tr>');
         $("#itemList").scrollTop($("#itemList")[0].scrollHeight);

@@ -95,7 +95,7 @@ ul.menu, ul.menu li a{
 
 #landingLetsGo .stats .single-stat span{
     font-size: 5em;
-    color: #ffa200;
+    color: #ffffff;
 }
 
 #landingAbout {
@@ -194,7 +194,7 @@ ul.menu, ul.menu li a{
 }
 
 .active-table:hover p{
-    background-color: #ffa200;
+    background-color: #13e00c;
 }
 
 .active-table p{

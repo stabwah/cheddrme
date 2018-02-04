@@ -7,9 +7,19 @@
   <meta name="description" content="Free Bitcoin Cash Point of Sale System"> 
   <meta name="keywords" content="bitcoin cash BCH POS point of sale" /> 
   <meta name="robots" content="index,follow,noarchive"> 
-  <title>cheddrPOS Bitcoin Cash Point of Sale System</title>
+  <title>cheddr POS</title>
+
+  <link rel="apple-touch-icon" sizes="120x120" href="images/favicons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="images/favicons/favicon-16x16.png">
+  <link rel="manifest" href="images/favicons/site.webmanifest">
+  <link rel="mask-icon" href="images/favicons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="images/favicons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#000000">
+  <meta name="msapplication-config" content="images/favicons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+
   <script type="text/javascript" src="js/jquery.js"></script>
-  <!-- <script type="text/javascript" src="js/foundation.js"></script> -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.min.js"></script>
   <script type="text/javascript" src="js/bchaddrjs-0.1.4.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/kjua@0.1.2/dist/kjua.min.js"></script>
@@ -23,13 +33,6 @@
   <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css"/>
   <link rel="stylesheet" type="text/css" href="css/foundation.css"/>
   <link rel="stylesheet" type="text/css" href="css/cheddrme.css"/>
-  <link rel="stylesheet" type="text/css" media="print" href="css/print.css">
-
-  <!--
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.min.js"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/kjua@0.1.2/dist/kjua.min.js"></script>
-  -->
 
   <script type="text/javascript">
     var paymentAddress = "";
@@ -215,6 +218,27 @@
         $($(this).closest("div")).remove();
         toastr.info("Recieve address removed");
         return false;
+      });
+
+      // edit order 
+      $(document).on("click", "a.editRow", function () {
+        var editHTML = '<input type="text" id="itemNameEdit" />&nbsp;&nbsp;<a href="#" class="cancelEditRow"><i class="fi-x-circle"></i></a>&nbsp;&nbsp;<a href="#" class="saveEditRow"><i class="fi-check"></i></a>';
+        $($(this).closest("td")).html(editHTML);
+      });
+
+      $(document).on("click", "a.saveEditRow", function (e) {
+        //  https://stackoverflow.com/questions/43153082/how-to-edit-and-update-table-row-dynamically-in-jquery-and-html
+        var val = $input.val();
+        var $td = $input.closest('td');
+        var editedLine = '' + val;
+        $td.empty();
+        $td.text(editedLine);
+      });
+
+      $(document).on("click", "a.cancelEditRow", function (e) {
+        var $td = $(this).closest('td');
+        $td.empty();
+        $td.text($td.data('oldText'));
       });
 
       // remove from order
