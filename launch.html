@@ -121,11 +121,11 @@
       $("#clearPaymentAddress").click(function () {
         paymentAddress = "";
         $("#inputAddress").val("");
-        toastr.error("Removed recieve address");
+        toastr.error("Removed receive address");
       });
 
       $("#saveSettings").click(function () {
-        // check recieve address has been added
+        // check receive address has been added
         var newAddress = $("#inputAddress").val();
         localStorage.removeItem("cheddrAddress");
         if(newAddress.length > 1) {
@@ -176,7 +176,7 @@
                   '<div><span class="addedAddress">' +  +
                   '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>'
               );*/
-                  toastr.success("Recieve address added");
+                  toastr.success("receive address added");
               } else {
                   toastr.error("This address already exists");
               }
@@ -190,7 +190,7 @@
               showSplash();
           }
         } else {
-          toastr.error("No recieve address")
+          toastr.error("No receive address")
         }
       });
 
@@ -216,7 +216,7 @@
 
       $(document).on("click", "a.removeAddress", function () {
         $($(this).closest("div")).remove();
-        toastr.info("Recieve address removed");
+        toastr.info("receive address removed");
         return false;
       });
 
@@ -620,12 +620,12 @@
             <option value="ZAR">ZAR</option>
           </select>
         </label>
-        <label>Recieve Address
+        <label>receive Address
           <div id="myAddresses" class="text-center"></div>
   
           <div class="input-group">
               <span class="input-group-label"><i class="fi-key"></i></span>
-              <input id="inputAddress" class="input-group-field" type="text" placeholder="Add recieve address">
+              <input id="inputAddress" class="input-group-field" type="text" placeholder="Add receive address">
               <div class="input-group-button">
                 <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Remove Address"><input type="submit" class="button" value="-" id="clearPaymentAddress"></span>
               </div>

@@ -22,7 +22,7 @@ TODO:
                 return v.toString(16);
             })
 
-    - rotate recieve addresses
+    - rotate receive addresses
 
     - calculate recommended transaction fee 
 
