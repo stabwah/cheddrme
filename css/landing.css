@@ -70,7 +70,6 @@ ul.menu, ul.menu li a{
     padding-bottom: 40px;
 }
 
-
 #landingLetsGo > h2,
 #landingAbout > h2{
     display: none;
@@ -93,6 +92,11 @@ ul.menu, ul.menu li a{
     color: #8a8a8a;
 }
 
+.letsgotext {
+    font-family: 'Montserrat Alternates', sans-serif;
+    font-size: 1.5em;
+    color: #ffffff;
+}
 #landingLetsGo .stats .single-stat span{
     font-size: 5em;
     color: #ffffff;
@@ -243,7 +247,6 @@ ul.menu, ul.menu li a{
 #landingDonate > p{
     color: #8a8a8a;
 }
-
 
 footer{
     text-align: center;
