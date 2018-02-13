@@ -616,7 +616,7 @@
   <!-- end totals -->
 
    <!-- start settings -->
-   <div class="row align-center medium-unstack medium-5 large-5 text-center" id="settingsModal">
+   <div class="row align-center medium-unstack medium-6 large-6 text-center" id="settingsModal">
       <div class="callout">
         <h5><i class="fi-wrench settingsIcon"><br/></i>Settings</h5>
         <hr>       
@@ -681,15 +681,15 @@
             <option value="Always">Always</option>
             <option selected="selected" value="Manual">Manual</option>
           </select>
+          
         </label>
-  
-<!--        <label>Printing Format<br/>
-          <select style="width: 10em;">
-            <option selected="selected" value="A4">A4</option>
-            <option value="44">44mm</option>
-          </select>
-        </label> -->
-
+  <!--
+        <fieldset class="large-6 cell">
+          <legend>Print Format</legend>
+          <input type="radio" name="settingsPrintFormat" value="A4" id="printFormatA4" required><label for="printFormatA4">A4</label>
+          <input type="radio" name="settingsPrintFormat" value="44" id="printFormat44"><label for="printFormat44">44mm</label>
+        </fieldset>
+  -->
         <hr>  
         <div class="input-group-button">
         <a class="button warning hollow large-2" id="cancelSettings">
@@ -706,7 +706,7 @@
 
  <!-- start footer -->
  <div id="cheddrFooter" class="row align-center medium-unstack medium-2 large-2 text-center">
-    <br/><br/>cheddr pos 0.4a<hr>
+    cheddr pos 0.4a<hr>
     <div class="medium-12 large-12 medium-unstack align-center columns text-center">
         <section>
             <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Donate!"><a href="#donateModal" rel="modal:open"><img src="./images/main_ico_donate.png" id="showDonate" alt="Donate" width="38px"></a></span>
