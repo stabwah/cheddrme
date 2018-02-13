@@ -1,6 +1,6 @@
 /********************************************************************
     cheddr.js
-    v.0.1.1
+    v.0.3
     github.com/stabwah/cheddrme
 ********************************************************************/
 
@@ -113,6 +113,13 @@ function showSettings() {
     if (checkStore != null) {
         $("#inputStoreName").text(checkStore);
         $("#splashStoreName").text(checkStore);
+    }
+
+    var checkPrint = localStorage.getItem("cheddrPrintPref");
+    if (checkPrint === "Always") {
+        $("#settingsPrint").val("Always");
+    } else {
+        $("#settingsPrint").val("Manual");
     }
 
     $("#mainForm").hide();
@@ -346,8 +353,9 @@ checkTransaction = function (orderTotalBCH) {
         currentTxArrivals = chkData["unconfirmedTxApperances"];
 
         currentTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
-        expectedTotal = parseFloat(initialBalance + orderTotalBCH).toFixed(8);
-
+        //expectedTotal = parseFloat(initialBalance + orderTotalBCH).toFixed(8);
+        // by-pass transaction check for print testing
+        expectedTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
         if (currentTotal >= expectedTotal) {
             // stop checking api
             clearInterval(intervalRateLimit);
@@ -362,12 +370,16 @@ checkTransaction = function (orderTotalBCH) {
             $("#splashStatusDate").empty();
             $("#splashStatusDate").append('Last Transaction:<br/>₿' + parseFloat(orderTotalBCH).toFixed(8) + '<br/>' + transactionStart.toLocaleTimeString());
             
-            setTimeout(
+            setTimeout(              // wait for tick animation (950ms)
                 function() 
                 {
-                    // wait for tick animation
-                    showSplash();
-                    // showReciept()
+                    var printState = $("#orderPrint").hasClass("hollow"); 
+                    if(printState) { // printing is disabled
+                        showSplash();
+                    } else {
+                        orderPrint();
+                        showSplash();
+                    }
                 }, 950);
         } else {
             console.log("current:: " + currentTotal);
@@ -402,8 +414,8 @@ addItemToOrder = function(itemName = "") {
         finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
 
         $("#orderedItems").append(
-        '<tr class="orderItem"><td><a href="#" class="deleteRow"><i class="fi-trash"></i></a><a href="#" class="editRow">&nbsp;&nbsp;<i class="fi-pencil"></i></a>&nbsp;&nbsp;' + 
-        itemName + '</td><td class="orderPriceFiat">' +
+        '<tr class="orderItem"><td>' + 
+        itemName + '&nbsp;&nbsp;<a href="#" class="editRow"><i class="fi-pencil"></i></a>&nbsp;&nbsp;<a href="#" class="deleteRow"><i class="fi-trash"></i></a></td><td class="orderPriceFiat">' +
         fiatSymbol + ' ' + itemPrice + '</td><td class="orderPriceBits">' + thousands(itemPriceBits) +
         '</td></tr>');
         $("#itemList").scrollTop($("#itemList")[0].scrollHeight);

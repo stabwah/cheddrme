@@ -22,11 +22,11 @@
   <!-- <script type="text/javascript" src="js/jquery.js"></script> replaced with cloudflare SRI URL -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js" integrity="sha256-siFczlgw4jULnUICcdm9gjQPZkw/YPDqhQ9+nAOScE4=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.min.js" integrity="sha256-mRYlCu5EG+ouD07WxLF8v4ZAZYCA6WrmdIXyn1Bv9Vk=" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="js/bchaddrjs-0.1.4.js"></script>
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/kjua@0.1.2/dist/kjua.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" integrity="sha256-yNbKY1y6h2rbVcQtf0b8lq4a+xpktyFc3pSYoGAY1qQ=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js" integrity="sha256-0rguYS0qgS6L4qVzANq4kjxPLtvnp5nn2nB5G1lWRv4=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js" integrity="sha256-p+jtLXu9vK7u6Bw0M/BX1koywAARK70JtZafxljQplU=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="js/bchaddrjs-0.1.4.js"></script>
   <script type="text/javascript" src="js/cheddrme.js"></script>
   
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.css" integrity="sha256-6qWTvP5IX0taismXz5k2YE+fvvkWUtuUqOIrddYSv8E=" crossorigin="anonymous" />
@@ -38,31 +38,27 @@
   <script type="text/javascript">
     var paymentAddress = "";
     var fiat = "AUD";
-
     var currentExchangeRate = 0;
     var transFee = 0;
-
     var transFeeBCH = 0.00000681;
     var transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
-
     var subTotal = 0;
     var finalTotal = 0;
-
     var subTotalBits = 0;
     var finalTotalBits = 0;
-
     var subTotalBCH = 0;
     var finalTotalBCH = 0;
-
     var result = 0;
     var currentEntry = "0";
-
     var intervalTransCheck = "";
+    var printPref = "";
+    var itemOrig = "";
 
     $(document).ready(function () {
       var checkSaved = localStorage.getItem("cheddrAddress");
       var checkFiat = localStorage.getItem("cheddrFiat");
       var checkStore = localStorage.getItem("cheddrStoreName");
+      var checkPrint = localStorage.getItem("cheddrPrintPref");
 
       if (checkFiat != null) {
         fiat = checkFiat;
@@ -94,15 +90,7 @@
       });
 
       /* start splash */
-      $("#refreshCog").click(function () {
-        // wipe saved settings??
-      });
-
-      $("#sideSettingsCog").click(function () {
-        $("#cancelSettings").show();
-        showSettings();
-      });
-
+      // show settings
       $("#settingsCog").click(function () {
         $("#cancelSettings").show();
         showSettings();
@@ -173,19 +161,17 @@
                   paymentAddress = cashaddr;
                   $("#inputAddress").val(cashaddr);
                   localStorage.setItem("cheddrAddress",cashaddr);
-              /*
-                  '<div><span class="addedAddress">' +  +
-                  '</span><span>&nbsp;<a href="#" class="removeAddress"><i class="fi-trash removeAddress"></i></a></span></div>'
-              );*/
                   toastr.success("Recieve address added");
               } else {
-                  toastr.error("This address already exists");
+                  toastr.warning("This address already exists");
               }
               var storeName = $("#inputStoreName").val();
               if (storeName != null) {
                 $("#splashStoreName").text(storeName);
                 localStorage.setItem("cheddrStoreName",storeName);
               }
+              printPref = $("#settingsPrint").val();
+              localStorage.setItem("cheddrPrintPref",printPref);
               var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
               $("#blockchainExplorerLink").attr("href", blockExplorerUrl);
               showSplash();
@@ -195,7 +181,7 @@
         }
       });
 
-      $("select").on("change", function () {
+      $("#settingsFiat").on("change", function () {
         fiat = this.value;
         $("#displayFiat").text(fiat);
         updateFiatSymbol();
@@ -207,6 +193,11 @@
       /* end settings */
 
       /* start input */
+      $("#sideSettingsCog").click(function () {
+        $("#cancelSettings").show();
+        showSettings();
+      });
+
       $("#backToSplash").click(function () {
         showSplash();
       });
@@ -223,26 +214,33 @@
 
       // edit order 
       $(document).on("click", "a.editRow", function () {
-        var editHTML = '<input type="text" id="itemNameEdit" />&nbsp;&nbsp;<a href="#" class="cancelEditRow"><i class="fi-x-circle"></i></a>&nbsp;&nbsp;<a href="#" class="saveEditRow"><i class="fi-check"></i></a>';
+        var $td = $(this).closest("td");
+        itemOrig = $td.text();
+        var trimmedItem = $.trim(itemOrig);
+        var editHTML = '<input type="text" id="itemNameEdit" value="' + trimmedItem + '"/>&nbsp;&nbsp;<a href="#" class="saveEditRow"><i class="fi-check"></i></a>&nbsp;&nbsp;<a href="#" class="cancelEditRow"><i class="fi-x-circle"></i></a>';
         $($(this).closest("td")).html(editHTML);
       });
 
+      // save row edit
       $(document).on("click", "a.saveEditRow", function (e) {
-        //  https://stackoverflow.com/questions/43153082/how-to-edit-and-update-table-row-dynamically-in-jquery-and-html
-        var val = $input.val();
-        var $td = $input.closest('td');
-        var editedLine = '' + val;
+        var itemName = $("#itemNameEdit").val();
+        var $td = $(this).closest("td");
+        var trimmedItem = $.trim(itemName);
+        var html = trimmedItem + '&nbsp;&nbsp;<a href="#" class="editRow"><i class="fi-pencil"></i></a>&nbsp;&nbsp;<a href="#" class="deleteRow"><i class="fi-trash"></i></a>';
         $td.empty();
-        $td.text(editedLine);
+        $td.append(html);
       });
 
+      // revert row edit
       $(document).on("click", "a.cancelEditRow", function (e) {
-        var $td = $(this).closest('td');
+        var $td = $(this).closest("td");
+        var trimmedItem = $.trim(itemOrig);
+        var html = trimmedItem + '&nbsp;&nbsp;<a href="#" class="editRow"><i class="fi-pencil"></i></a>&nbsp;&nbsp;<a href="#" class="deleteRow"><i class="fi-trash"></i></a>';
         $td.empty();
-        $td.text($td.data('oldText'));
+        $td.append(html);
       });
 
-      // remove from order
+      // remove row from order
       $(document).on("click", "a.deleteRow", function () {
         $($(this).closest("tr")).remove();
         updateTotals();
@@ -274,7 +272,15 @@
         $("#addToOrder").click();
         if (finalTotal > 0) {
           $("#paymentSummary").show();
+
+          if(printPref === "Always") {
+            $('#orderPrint').removeClass("hollow");
+          } else {
+            $('#orderPrint').addClass("hollow");
+          }
+
           $("#itemList").hide();
+
           var specificAmount = paymentAddress + '?amount=' + parseFloat(finalTotalBCH).toFixed(8);
           var qrcode = kjua({
             text: specificAmount,
@@ -285,6 +291,7 @@
             mSize: 26,
             mPosX: 50,
             mPosY: 50,
+            // TODO: issues reported with bitcoin.com wallet
             //image: document.getElementById('qrbch'),
             //mode: 'image',
             //fill: '#3cad66' // green matches logo
@@ -304,7 +311,13 @@
 
       /* start order summary */
       $("#orderPrint").click(function () {
-          orderPrint();
+          var printState = $("#orderPrint").hasClass("hollow"); 
+          if(printState) { // printing is disabled
+            $('#orderPrint').removeClass("hollow");
+          } else {
+            $('#orderPrint').addClass("hollow");
+          }
+          //orderPrint();
       });
 
       $("#orderCancel").click(function () {
@@ -491,7 +504,7 @@
     <!-- end main form -->
 
     <!-- payment summary -->
-    <div class="large-7 medium-7 columns text-center" id="paymentSummary">
+    <div class="medium-8 columns text-center" id="paymentSummary">
       <div class="callout">
         <h5>Checkout</h5>
         <hr>
@@ -523,7 +536,7 @@
           <a class="button large-2 alert" id="orderCancel">
             <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Cancel"><i class="fi-x"></i></span>
           </a>
-          <a class="button large-2 hollow secondary" id="orderPrint">
+          <a class="button large-2 secondary" id="orderPrint">
               <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Print"><i class="fi-print"></i></span>
           </a>  
           <a class="button large-2 success" id="orderDone">
@@ -537,8 +550,8 @@
     <!-- end payment summary -->
 
     <!-- order summary -->
-    <div class="large-8 columns" id="itemList" style="height: 31em; overflow-y: auto; overflow-x: hidden;">
-      <table width="80%" class="hover">
+    <div class="medium-8 columns" id="itemList" style="height: 31em; overflow-y: auto; overflow-x: hidden;">
+      <table class="hover">
         <thead>
           <tr>
             <th class="text-center">Item</th>
@@ -555,19 +568,19 @@
     <hr>
 
     <!-- totals -->
-    <div class="large-8 columns">
+    <div class="medium-8 columns">
       <div id="orderTotal">
-        <div class="medium-5 large-5 columns">
+        <div class="medium-4 columns">
           <section>
             <h2 class="orderTotal">Total</h2>
           </section>
         </div>
-        <div class="medium-3 large-3 columns">
-          <section style="padding-top: 15px;">
+        <div class="medium-4 columns">
+          <section style="padding-top: 0.8em;">
             <h4 class="orderTotal" id="orderTotalFiat">&nbsp;</h4>
           </section>
         </div>
-        <div class="medium-4 large-4 columns">
+        <div class="medium-4 columns">
           <section>
             <h2 class="orderTotal" id="orderTotalBits">&nbsp;</h2>
           </section>
@@ -586,7 +599,7 @@
         <h5><i class="fi-wrench settingsIcon"><br/></i>Settings</h5>
         <hr>       
         <label>Local Currency<br/>
-          <select style="width: 10em;">
+          <select id="settingsFiat" style="width: 5em;">
             <option selected="selected" value="AUD">AUD</option>
             <option value="BRL">BRL</option>
             <option value="CAD">CAD</option>
@@ -639,9 +652,23 @@
               </span>
               <input id="inputStoreName" class="input-group-field" type="text" placeholder="Your Store Name (Optional)">
             </div>
-          </label>
-        <hr>
+        </label>
+
+        <label>Printing<br/>
+          <select id="settingsPrint" style="width: 8em;">
+            <option selected="selected" value="Always">Always</option>
+            <option value="Manual">Manual</option>
+          </select>
+        </label>
   
+<!--        <label>Printing Format<br/>
+          <select style="width: 10em;">
+            <option selected="selected" value="A4">A4</option>
+            <option value="44">44mm</option>
+          </select>
+        </label> -->
+
+        <hr>  
         <div class="input-group-button">
         <a class="button warning hollow large-2" id="cancelSettings">
           <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Cancel"><i class="fi-prohibited"></i></span>
@@ -657,7 +684,7 @@
 
  <!-- start footer -->
  <div id="cheddrFooter" class="row align-center medium-unstack medium-2 large-2 text-center">
-    <br/><br/>cheddr pos 0.2a<hr>
+    <br/><br/>cheddr pos 0.3a<hr>
     <div class="medium-12 large-12 medium-unstack align-center columns text-center">
         <section>
             <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Donate!"><a href="#donateModal" rel="modal:open"><img src="./images/main_ico_donate.png" id="showDonate" alt="Donate" width="38px"></a></span>
