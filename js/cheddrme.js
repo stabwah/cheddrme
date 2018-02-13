@@ -149,8 +149,6 @@ function resetOrderForm() {
 }
 
 function orderPrint() {
-    $("#itemList").hide();
-    $("#orderedItems").hide();
     $("#orderFooter").hide();
     $(".keypad").hide();
     $("#paymentTitle").hide();
@@ -188,6 +186,7 @@ function orderPrint() {
     $("#cheddrInvoice").remove();
 }
 
+// splash page time display
 updateSplashClock = function () {
     var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]; 
     var dayNames= ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
@@ -211,6 +210,7 @@ updateSplashClock = function () {
     }, 10000);	
   }; 
 
+// update local currency symbol
 function updateFiatSymbol() {
     var currency_symbols = {
         'AUD': '$', 
@@ -239,6 +239,185 @@ function updateFiatSymbol() {
     $("#displayFiat").text(fiat);
     $("#fiatSymbol").text(fiatSymbol);
 }
+
+// get exchange rate
+getExchRate = function (fiat) {
+    var url = "https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/?convert=" + fiat; 
+    
+    if (exchangeUpdated != null) {
+        var timeNow = new Date($.now());
+        var rateLimit = diff_minutes(exchangeUpdated, timeNow);
+    }
+    
+    if (rateLimit > 5 || exchangeUpdated === null) {
+        exchangeUpdated = new Date($.now());
+        $.get(url)
+        .success( function (data, status) {
+            var local = fiat.toString().toLowerCase();
+            currentExchangeRate = data[0]['price_' + local];    
+            if (currentExchangeRate > 0) {
+                toastr.success('1 BCH = ' + fiatSymbol + parseFloat(currentExchangeRate).toFixed(2));
+
+                var splashUpdate = fiatSymbol + parseFloat(currentExchangeRate).toFixed(2) + '<br/>' + fiat + ' / BCH';
+                $("#splashRate").empty();
+                $("#splashRate").append(splashUpdate);
+
+                transFee = parseFloat(transFeeBCH * currentExchangeRate);
+                transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
+                $("#transactionFee").text("Recommended transaction fee: ");
+                $("#transFeeRecommended").text(transFeeBits);
+                $("#transactionFeeFiat").text(fiatSymbol + transFee.toFixed(4));
+            } else { 
+                toastr.error("Could not retrieve exchange rate");
+            }
+        })
+        .fail( function() {
+            toastr.error("Could not retrieve exchange rate");
+        });
+    } 
+};
+
+// get wallet details
+getInitials = function () {
+    var url =  "https://blockdozer.com/insight-api/addr/" + paymentAddress;
+
+    $.get(url)
+    .success( function(inData) {
+          var intialUpdated = new Date($.now());
+  
+          initialBalance = inData["balance"];
+          initialBalanceSat = inData["balanceSat"];
+          initialUnBalance = inData["unconfirmedBalance"]; // totalReceived
+          initialUnBalanceSat = inData["unconfirmedBalanceSat"]; 
+          initialTxArrivals = inData["unconfirmedTxApperances"];
+          initialTotal = parseFloat(initialBalance + initialUnBalance).toFixed(8);
+          console.log("initial::" + initialTotal);
+          clearInterval(intervalRateLimit);
+        }, "json" )
+    .fail( function() {
+        toastr.error("Couldn't retrieve transaction details");
+    });
+};
+
+// check transaction
+checkTransaction = function (orderTotalBCH) {
+    var url = "https://blockdozer.com/insight-api/addr/" + paymentAddress;
+
+    $.get(url)
+    .success( function(chkData) {
+        var transactionStart = new Date($.now());
+
+        currentBalance = chkData["balance"];
+        currentBalanceSat = chkData["balanceSat"];
+        currentUnBalance = chkData["unconfirmedBalance"];
+        currentUnBalanceSat = chkData["unconfirmedBalanceSat"];
+        currentTxArrivals = chkData["unconfirmedTxApperances"];
+
+        currentTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
+        expectedTotal = parseFloat(initialBalance + orderTotalBCH).toFixed(8);
+        // by-pass transaction check for print testing
+        // expectedTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
+        if (currentTotal >= expectedTotal) {
+            // stop checking api
+            clearInterval(intervalRateLimit);
+
+            totalToday += orderTotalBCH;
+
+            $(".circle-loader").toggleClass("load-complete");
+            $(".checkmark").toggle();      
+            toastr.success("Payment recieved!");
+
+            $("#splashStatus").text('Total: ₿ ' + totalToday);
+            $("#splashStatusDate").empty();
+            $("#splashStatusDate").append('Last Transaction:<br/>₿' + parseFloat(orderTotalBCH).toFixed(8) + '<br/>' + transactionStart.toLocaleTimeString());
+            
+            setTimeout(              // wait for tick animation (800ms)
+                function() 
+                {
+                    var printState = $("#orderPrint").hasClass("hollow"); 
+                    if(printState) { // printing is disabled
+                        showSplash();
+                    } else {
+                        orderPrint();
+                        showSplash();
+                    }
+                }, 900);
+        } else {
+            console.log("current::" + currentTotal);
+            console.log("expected::" + expectedTotal);
+        }
+    }, "json")
+    .fail( function() {
+        toastr.error("Couldn't retrieve transaction details");
+    });
+};
+
+
+// update POS display
+updateScreen = function (displayValue) {
+    var display = displayValue.toString();
+    currentEntry = display;
+    $("#mainDisplay").val(display.substring(0, 10));
+};
+
+// alternating table row colours
+updateTable = function () {
+    $('table').each(function() {
+        $('tr:even',  this).addClass('primary');
+        $('tr:odd', this).removeClass('primary');
+    });
+};
+
+// add item to order list
+addItemToOrder = function(itemName = "") {
+    var itemPrice = parseFloat($("#mainDisplay").val()).toFixed(2);
+    var itemPriceBCH = 0;
+    if (itemPrice > 0) {       
+        subTotal = parseFloat(subTotal) + parseFloat(itemPrice);
+        finalTotal = parseFloat(subTotal);
+
+        itemPriceBCH = (parseFloat(itemPrice) / parseFloat(currentExchangeRate)).toFixed(10);
+        subTotalBCH = parseFloat(subTotalBCH) + parseFloat(itemPriceBCH);
+        finalTotalBCH = parseFloat(subTotalBCH);
+
+        itemPriceBits = parseFloat(itemPriceBCH * 1000000).toFixed(2);
+        subTotalBits = parseFloat(subTotalBCH * 1000000).toFixed(2);
+        finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
+
+        $("#orderedItems").append(
+        '<tr class="orderItem"><td>' + 
+        itemName + '&nbsp;&nbsp;<a href="#" class="editRow"><i class="fi-pencil"></i></a>&nbsp;&nbsp;<a href="#" class="deleteRow"><i class="fi-trash"></i></a></td><td class="orderPriceFiat">' +
+        fiatSymbol + ' ' + itemPrice + '</td><td class="orderPriceBits">' + thousands(itemPriceBits) +
+        '</td></tr>');
+        $("#itemList").scrollTop($("#itemList")[0].scrollHeight);
+
+        updateTotals();
+        updateScreen(0);
+    }
+};
+
+// calculate totals
+updateTotals = function () {
+    updateTable();
+    var finalTotalBits = 0;
+    $(".orderPriceBits").each(function() {
+        orderPriceB = $(this).text().replace(',', '');
+        finalTotalBits += parseFloat(orderPriceB);
+    });
+    $("#orderTotalBits").text(thousands(finalTotalBits.toFixed(2)));
+
+    var finalTotalFiat = 0;
+    $(".orderPriceFiat").each(function() {
+        orderPriceText = $(this).text().replace(fiatSymbol, '');
+        finalTotalFiat += parseFloat(orderPriceText);
+    });
+    $("#orderTotalFiat").text(fiatSymbol + finalTotalFiat.toFixed(2));
+    finalTotal = finalTotalFiat;
+
+    finalTotalBCH = finalTotalBits / 1000000;
+    $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
+};
+
 
 function copyToClipboard(elem) {
     // create hidden text element, if it doesn't already exist
@@ -311,193 +490,12 @@ function thousands (nStr) {
     return x1 + x2;
 }
 
+// time math
 function diff_minutes(dt2, dt1) {
   var diff=(dt2.getTime() - dt1.getTime()) / 1000;
   diff /= 60;
   return Math.abs(Math.round(diff));
 }
-
-// get exchange rate
-getExchRate = function (fiat) {
-    var url = "https://api.coinmarketcap.com/v1/ticker/bitcoin-cash/?convert=" + fiat; 
-    
-    if (exchangeUpdated != null) {
-        var timeNow = new Date($.now());
-        var rateLimit = diff_minutes(exchangeUpdated, timeNow);
-    }
-    
-    if (rateLimit > 5 || exchangeUpdated === null) {
-        exchangeUpdated = new Date($.now());
-        $.get(url)
-        .success( function (data, status) {
-            var local = fiat.toString().toLowerCase();
-            currentExchangeRate = data[0]['price_' + local];    
-            if (currentExchangeRate > 0) {
-                toastr.success('1 BCH = ' + fiatSymbol + parseFloat(currentExchangeRate).toFixed(2));
-
-                var splashUpdate = fiatSymbol + parseFloat(currentExchangeRate).toFixed(2) + '<br/>' + fiat + ' / BCH';
-                $("#splashRate").empty();
-                $("#splashRate").append(splashUpdate);
-
-                transFee = parseFloat(transFeeBCH * currentExchangeRate);
-                transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
-                $("#transactionFee").text("Recommended transaction fee: ");
-                $("#transFeeRecommended").text(transFeeBits);
-                $("#transactionFeeFiat").text(fiatSymbol + transFee.toFixed(4));
-            } else { 
-                toastr.error("Could not retrieve exchange rate");
-            }
-        })
-        .fail( function() {
-            toastr.error("Could not retrieve exchange rate");
-        });
-    } 
-};
-
-// get wallet details
-getInitials = function () {
-    var url =  "https://blockdozer.com/insight-api/addr/" + paymentAddress;
-
-    $.get(url)
-    .success( function(inData) {
-          var intialUpdated = new Date($.now());
-  
-          initialBalance = inData["balance"];
-          initialBalanceSat = inData["balanceSat"];
-          initialUnBalance = inData["unconfirmedBalance"]; // totalReceived
-          initialUnBalanceSat = inData["unconfirmedBalanceSat"]; 
-          initialTxArrivals = inData["unconfirmedTxApperances"];
-          initialTotal = parseFloat(initialBalance + initialUnBalance).toFixed(8);
-          console.log("initial:: " + initialTotal);
-        }, "json" )
-    .fail( function() {
-        toastr.error("Couldn't retrieve transaction details");
-    });
-};
-
-// check transaction
-checkTransaction = function (orderTotalBCH) {
-    var url = "https://blockdozer.com/insight-api/addr/" + paymentAddress;
-
-    $.get(url)
-    .success( function(chkData) {
-        var transactionStart = new Date($.now());
-
-        currentBalance = chkData["balance"];
-        currentBalanceSat = chkData["balanceSat"];
-        currentUnBalance = chkData["unconfirmedBalance"];
-        currentUnBalanceSat = chkData["unconfirmedBalanceSat"];
-        currentTxArrivals = chkData["unconfirmedTxApperances"];
-
-        currentTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
-        //expectedTotal = parseFloat(initialBalance + orderTotalBCH).toFixed(8);
-        // by-pass transaction check for print testing
-        expectedTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
-        if (currentTotal >= expectedTotal) {
-            // stop checking api
-            clearInterval(intervalRateLimit);
-
-            totalToday += orderTotalBCH;
-
-            $(".circle-loader").toggleClass("load-complete");
-            $(".checkmark").toggle();      
-            toastr.success("Payment recieved!");
-
-            $("#splashStatus").text('Total: ₿ ' + totalToday);
-            $("#splashStatusDate").empty();
-            $("#splashStatusDate").append('Last Transaction:<br/>₿' + parseFloat(orderTotalBCH).toFixed(8) + '<br/>' + transactionStart.toLocaleTimeString());
-            
-            setTimeout(              // wait for tick animation (800ms)
-                function() 
-                {
-                    var printState = $("#orderPrint").hasClass("hollow"); 
-                    if(printState) { // printing is disabled
-                        showSplash();
-                    } else {
-                        orderPrint();
-                        showSplash();
-                    }
-                }, 900);
-        } else {
-            console.log("current:: " + currentTotal);
-            console.log("expected:: " + expectedTotal);
-        }
-    }, "json")
-    .fail( function() {
-        toastr.error("Couldn't retrieve transaction details");
-    });
-};
-
-// update POS display
-updateScreen = function (displayValue) {
-    var display = displayValue.toString();
-    currentEntry = display;
-    $("#mainDisplay").val(display.substring(0, 10));
-};
-
-addItemToOrder = function(itemName = "") {
-    var itemPrice = parseFloat($("#mainDisplay").val()).toFixed(2);
-    var itemPriceBCH = 0;
-    if (itemPrice > 0) {       
-        subTotal = parseFloat(subTotal) + parseFloat(itemPrice);
-        finalTotal = parseFloat(subTotal);
-
-        itemPriceBCH = (parseFloat(itemPrice) / parseFloat(currentExchangeRate)).toFixed(10);
-        subTotalBCH = parseFloat(subTotalBCH) + parseFloat(itemPriceBCH);
-        finalTotalBCH = parseFloat(subTotalBCH);
-
-        itemPriceBits = parseFloat(itemPriceBCH * 1000000).toFixed(2);
-        subTotalBits = parseFloat(subTotalBCH * 1000000).toFixed(2);
-        finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
-
-        $("#orderedItems").append(
-        '<tr class="orderItem"><td>' + 
-        itemName + '&nbsp;&nbsp;<a href="#" class="editRow"><i class="fi-pencil"></i></a>&nbsp;&nbsp;<a href="#" class="deleteRow"><i class="fi-trash"></i></a></td><td class="orderPriceFiat">' +
-        fiatSymbol + ' ' + itemPrice + '</td><td class="orderPriceBits">' + thousands(itemPriceBits) +
-        '</td></tr>');
-        $("#itemList").scrollTop($("#itemList")[0].scrollHeight);
-
-        updateTotals();
-        updateScreen(0);
-    }
-};
-
-// alternating table row colours
-updateTable = function () {
-    $('table').each(function() {
-        $('tr:even',  this).addClass('primary');
-        $('tr:odd', this).removeClass('primary');
-    });
-};
-
-// calculate totals
-updateTotals = function () {
-    updateTable();
-    var finalTotalBits = 0;
-    $(".orderPriceBits").each(function() {
-        orderPriceB = $(this).text().replace(',', '');
-        finalTotalBits += parseFloat(orderPriceB);
-    });
-    $("#orderTotalBits").text(thousands(finalTotalBits.toFixed(2)));
-
-    var finalTotalFiat = 0;
-    $(".orderPriceFiat").each(function() {
-        orderPriceText = $(this).text().replace(fiatSymbol, '');
-        finalTotalFiat += parseFloat(orderPriceText);
-    });
-    $("#orderTotalFiat").text(fiatSymbol + finalTotalFiat.toFixed(2));
-    finalTotal = finalTotalFiat;
-
-    finalTotalBCH = finalTotalBits / 1000000;
-    $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
-};
-
-// Retrieve list of recieve addresses (so we can rotate later)
-getAddressList = function() {
-    $(".addedAddress").each(function() {
-        testAdd = $(this).text();
-    });
-};
 
 // is a variable a number?
 isNumber = function (value) {

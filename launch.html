@@ -33,8 +33,8 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" integrity="sha256-R91pD48xW+oHbpJYGn5xR0Q7tMhH4xOrWn1QqMRINtA=" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css" integrity="sha256-CWltC/W+elkkUKhitcztPiSfE3AEpzAvrkmEqB68Lx0=" crossorigin="anonymous" />
   <link rel="stylesheet" type="text/css" href="css/foundation.css"/>
-  <link rel="stylesheet" type="text/css" href="css/print.css"/>
   <link rel="stylesheet" type="text/css" href="css/cheddrme.css"/>
+  <link rel="stylesheet" type="text/css" href="css/print.css"/>
 
   <script type="text/javascript">
     var paymentAddress = "";
@@ -315,7 +315,17 @@
               parseFloat(finalTotalBCH).toFixed(8) + '</span> to:');
             $("#paymentCode").append(qrcode);
             $("#paymentAddress").val(paymentAddress);
-            getInitials();
+            var rateLimitAttempts = 0;
+            intervalRateLimit = setInterval(function () {
+              if (rateLimitAttempts < 3) { 
+                  rateLimitAttempts += 1;
+                  getInitials();
+                  } else {
+                    // stop re-trying
+                    clearInterval(intervalRateLimit);
+                    toastr.warning("Failed getting wallet details")
+              }
+            }, 2500);
           }
         } else {
           toastr.error('No items to checkout');
@@ -448,7 +458,7 @@
         <p class="splashStoreName" id="splashStoreName"></p>
         <p id="splashStatus"></p>
 
-        <p class="store-profile-info" id="splashStatusDate">Stack cheddars forever, live treacherous, all the et ceteras</p>
+        <p class="store-profile-info" id="splashStatusDate">Stack cheddars forever</p>
       </div>
 
       <div class="store-profile-actions">
