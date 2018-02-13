@@ -50,6 +50,15 @@ body {
   text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #fff, 0 0 20px #E33100, 0 0 30px #E33100, 0 0 40px #E33100, 0 0 50px #E33100, 0 0 75px #E33100;
 }
 
+.editRow, .deleteRow, .saveEditRow, .cancelEditRow {
+  color: #d3d3d3;
+}
+
+#itemNameEdit {
+  width: 12em;
+  display: inline;
+}
+
 #closeDonation {
   border-radius: 1000px; 
 }
@@ -288,4 +297,119 @@ th {
     width: 2em;
     opacity: 1;
   }
+}
+
+/* printing */
+#cheddrInvoice {
+  box-shadow: 0 0 1in -0.25in rgba(0, 0, 0, 0.5);
+  padding: 0.3em;
+  margin: 0 auto;
+  width: 60%;
+  background: #FFF;
+}
+#cheddrInvoice #cheddrInvoiceHeader {
+  min-height: 5em;
+}
+#cheddrInvoice #cheddrInvoiceSubHeader {
+  min-height: 2em;
+}
+#cheddrInvoice #cheddrInvoiceBody {
+  min-height: 1em;
+}
+#cheddrInvoiceFooter {
+  width: 106px;
+}
+#cheddrInvoice .info {
+  display: block;
+  margin-left: 0;
+}
+#cheddrInvoice .invoiceItemList {
+  border-bottom: 0.7px solid #EEE;
+}
+#cheddrInvoice #docketThankyou {
+  margin-top: 0.5em;
+}
+#cheddrInvoice h1 {
+  font-size: 1.5em;
+  color: #222;
+}
+#cheddrInvoice h2 {
+  font-size: 1em;
+}
+#cheddrInvoice h3 {
+  font-size: 1.2em;
+  font-weight: 300;
+  line-height: 2em;
+}
+#cheddrInvoice p {
+  font-size: 0.9em;
+  color: #666;
+  line-height: 1em;
+}
+#cheddrInvoice table {
+  text-align: left;
+  width: 100%;
+  border-collapse: collapse;
+}
+#cheddrInvoice .invoiceTitle {
+  font-size: 0.9em;
+  line-height: 0.5em;
+  background: #EEE;
+}
+#cheddrInvoice hr {
+  border: 0; 
+  height: 1px; 
+  background-image: linear-gradient(to right, rgba(187, 187, 187, 0), rgba(187, 187, 187, 0.75),rgba(187, 187, 187, 0));
+}
+#cheddrInvoice .itemHeader {
+  width: 50em;
+  min-height: 5em;
+}
+#cheddrInvoice .fiatHeader {
+  width: 7em;
+  text-align: right;
+}
+#cheddrInvoice .bitsHeader {
+  width: 12em;
+  text-align: right;
+}
+#cheddrInvoice .itemName {
+  font-size: 0.8em;
+}
+#cheddrInvoice .itemPriceFiat, .itemPriceBits {
+  font-size: 0.8em;
+  text-align: right;
+}
+#cheddrInvoice .itemPrice {
+  font-size: 0.8em;
+  text-align: right;
+}
+#cheddrInvoice .itemPriceBCH {
+  font-size: 0.8em;
+  text-align: right;
+}
+#cheddrInvoice .invoiceSubTotal {
+  font-size: 0.9em;
+  line-height: 0.5em;
+  background: rgb(241, 241, 241);
+}
+#cheddrInvoice .taxFiat, .taxBits {
+  font-size: 1em;
+  text-align: right;
+}
+#cheddrInvoice .totalFiat, .totalBits {
+  font-size: 1em;
+  text-align: right;
+}
+#cheddrInvoice .invoiceTotal {
+  font-size: 1.1em;
+  line-height: 0.5em;
+  background: rgb(182, 182, 182);
+}
+#cheddrInvoice .docketAddress {
+  font-size: 0.8em;
+}
+#cheddrInvoice .docketFooter {
+  margin-top: 0.4em;
+  font-size: 0.7em;
 }

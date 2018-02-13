@@ -2,6 +2,11 @@
 /* source: https://github.com/h5bp/html5-boilerplate/blob/master/dist/doc/TOC.md#print-styles */
 @media print
 {
+    @page {
+        size: auto;   /* auto is the initial value */
+        margin: 0;  /* this affects the margin in the printer settings */
+    }
+    
     /* page-break-after: avoid;
        page-break-inside: avoid; */
 
@@ -55,12 +60,15 @@
         display: none !important;
     }
 
-    body, div, p, span { 
+    body, div, span { 
         background-color:#FFFFFF;
-        background-image:none; 
         color:#000000;
-        font: 12pt Georgia, "Times New Roman", Times, serif;
-        line-height: 1.3;
+        font-family: 'Lato', sans-serif;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+        font-size: 18px;
+        word-wrap: break-word;
     }
 
     img {
@@ -131,7 +139,7 @@
         page-break-after: avoid;
     }
 
-    #itemList, #orderedItems    { display: inline; }
+    #itemList, #orderedItems    { display: none; }
     #paymentSummary, #summaryWaiter,  { display: none; }
     #donateModal    { display:none; }
     #menubar, #sideMenu        { display:none; }
@@ -139,7 +147,6 @@
     #settingsModal  { display:none; }
     #cheddrFooter   { display:none; }
     .keypad, #inputFields        { display:none; }
-    #cheddrLogo     { display:none; }
     #addToOrder, #clearInput, #orderCheckout, #orderCancel, #orderPrint, #orderDone, #copyPaymentAddress { display:none; }
 }
 -->

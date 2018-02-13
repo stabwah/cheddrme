@@ -33,6 +33,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.css" integrity="sha256-R91pD48xW+oHbpJYGn5xR0Q7tMhH4xOrWn1QqMRINtA=" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/foundicons/3.0.0/foundation-icons.css" integrity="sha256-CWltC/W+elkkUKhitcztPiSfE3AEpzAvrkmEqB68Lx0=" crossorigin="anonymous" />
   <link rel="stylesheet" type="text/css" href="css/foundation.css"/>
+  <link rel="stylesheet" type="text/css" href="css/print.css"/>
   <link rel="stylesheet" type="text/css" href="css/cheddrme.css"/>
 
   <script type="text/javascript">
@@ -217,8 +218,9 @@
         var $td = $(this).closest("td");
         itemOrig = $td.text();
         var trimmedItem = $.trim(itemOrig);
-        var editHTML = '<input type="text" id="itemNameEdit" value="' + trimmedItem + '"/>&nbsp;&nbsp;<a href="#" class="saveEditRow"><i class="fi-check"></i></a>&nbsp;&nbsp;<a href="#" class="cancelEditRow"><i class="fi-x-circle"></i></a>';
+        var editHTML = '<input type="text" id="itemNameEdit" value="' + trimmedItem + '"/>&nbsp;&nbsp;<a href="#" class="saveEditRow"><i class="saveEditRow fi-check"></i></a>&nbsp;&nbsp;<a href="#" class="cancelEditRow"><i class="cancelEditRow fi-x-circle"></i></a>';
         $($(this).closest("td")).html(editHTML);
+        $("#itemNameEdit").focus();
       });
 
       // save row edit
@@ -226,7 +228,7 @@
         var itemName = $("#itemNameEdit").val();
         var $td = $(this).closest("td");
         var trimmedItem = $.trim(itemName);
-        var html = trimmedItem + '&nbsp;&nbsp;<a href="#" class="editRow"><i class="fi-pencil"></i></a>&nbsp;&nbsp;<a href="#" class="deleteRow"><i class="fi-trash"></i></a>';
+        var html = trimmedItem + '&nbsp;&nbsp;<a href="#" class="editRow"><i class="editRow fi-pencil"></i></a>&nbsp;&nbsp;<a href="#" class="deleteRow"><i class="deleteRow fi-trash"></i></a>';
         $td.empty();
         $td.append(html);
       });
@@ -235,9 +237,20 @@
       $(document).on("click", "a.cancelEditRow", function (e) {
         var $td = $(this).closest("td");
         var trimmedItem = $.trim(itemOrig);
-        var html = trimmedItem + '&nbsp;&nbsp;<a href="#" class="editRow"><i class="fi-pencil"></i></a>&nbsp;&nbsp;<a href="#" class="deleteRow"><i class="fi-trash"></i></a>';
+        var html = trimmedItem + '&nbsp;&nbsp;<a href="#" class="editRow"><i class="editRow fi-pencil"></i></a>&nbsp;&nbsp;<a href="#" class="deleteRow"><i class="deleteRow fi-trash"></i></a>';
         $td.empty();
         $td.append(html);
+      });
+
+      // keyboard shortcuts for row edits
+      $(document).on("keypress", "#itemNameEdit", function (e) {
+          var code = e.keyCode || e.which;
+          if (code == 13) {                        // ENTER
+            $(".saveEditRow").click();
+          }
+          if (code == 27) {                        // ESCAPE
+            $(".cancelEditRow").click();
+          }
       });
 
       // remove row from order
@@ -340,7 +353,6 @@
         intervalRateLimit = setInterval(function () {
           if (rateLimitAttempts < 5) { 
               rateLimitAttempts += 1;
-              console.log("retry:: " + rateLimitAttempts);
               checkTransaction(finalTotalBCH);
               } else {
                 // stop re-trying
@@ -447,13 +459,13 @@
   <!-- end store splash -->
 
   <!-- main form -->
-  <div class="row align-center medium-unstack medium-8 large-8 text-center" id="mainForm">
+  <div class="row align-center medium-unstack medium-10 large-10 text-center" id="mainForm">
     <div class="medium-4 large-4 columns callout text-center" id="inputFields">
 
       <img src="./images/cheddr.png" id="cheddrLogo" alt="cheddr pos">
 
       <hr>
-      <div class="large-22 medium-12 columns">
+      <div class="large-12 medium-12 columns">
         <div class="input-group">
           <span id="fiatSymbol" class="input-group-label"></span>
           <input class="input-group-field" type="text" id="mainDisplay"/>
@@ -568,7 +580,7 @@
     <hr>
 
     <!-- totals -->
-    <div class="medium-8 columns">
+    <div class="medium-8 columns" id="orderFooter">
       <div id="orderTotal">
         <div class="medium-4 columns">
           <section>
@@ -684,7 +696,7 @@
 
  <!-- start footer -->
  <div id="cheddrFooter" class="row align-center medium-unstack medium-2 large-2 text-center">
-    <br/><br/>cheddr pos 0.3a<hr>
+    <br/><br/>cheddr pos 0.4a<hr>
     <div class="medium-12 large-12 medium-unstack align-center columns text-center">
         <section>
             <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Donate!"><a href="#donateModal" rel="modal:open"><img src="./images/main_ico_donate.png" id="showDonate" alt="Donate" width="38px"></a></span>

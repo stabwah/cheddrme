@@ -1,6 +1,6 @@
 /********************************************************************
     cheddr.js
-    v.0.3
+    v0.4
     github.com/stabwah/cheddrme
 ********************************************************************/
 
@@ -85,6 +85,13 @@ function showSplash() {
 function showMain() {
     $("#mainForm").show();
     $("#menubar").show();
+    $(".keypad").show();
+    $("#menubar").show();
+    $("#inputFields").show();
+    $("#settingsModal").hide(); 
+    $("#donateModal").hide();
+    $("#cheddrFooter").hide();
+
     $("#storeSplash").hide();
     $("#settingsModal").hide(); 
     $("#donateModal").hide();
@@ -137,12 +144,14 @@ function resetOrderForm() {
     $("#orderedItems").find("tr").remove();
     $("#paymentCode").empty();
     $("#itemList").show();
+    $("#orderFooter").show();
     updateTotals();
 }
 
 function orderPrint() {
-    $("#itemList").show();
-    $("#orderedItems").show();
+    $("#itemList").hide();
+    $("#orderedItems").hide();
+    $("#orderFooter").hide();
     $(".keypad").hide();
     $("#paymentTitle").hide();
     $("#paymentSummary").hide();
@@ -156,7 +165,27 @@ function orderPrint() {
     $("#settingsModal").hide(); 
     $("#donateModal").hide();
     $("#cheddrFooter").hide();
+
+    var checkStore = localStorage.getItem("cheddrStoreName");
+    var timeNow = new Date($.now());
+
+    var htmlHeader = '<div id="cheddrInvoice"><center id="cheddrInvoiceHeader"><div class="logo"><img src="images/receiptLogo.png" width="120px" height="120px"></div><div class="info"><h2>' + checkStore + '</h2></div></center><hr><div id="cheddrInvoiceSubHeader"><div class="info"><p>' + uuid() + '<br/>' + timeNow.toLocaleString() + '</p></div></div><br/>';
+    var htmlBody = '<div id="cheddrInvoiceBody"><div id="table"><table><tr class="invoiceTitle"><td class="itemHeader"><h2>Item</h2></td><td class="fiatHeader"><h2>Price ($)</h2></td><td class="bitsHeader"><h2>Price (bits)</h2></td></tr>';
+    var htmlFooter = '<tr class="invoiceTotal"><td>Total</td><td class="totalFiat"><h2>' + fiatSymbol + parseFloat(finalTotal).toFixed(2) + '</h2></td><td class="totalBits"><h2>' + parseFloat(finalTotalBits).toFixed(2) + '</h2></td></tr></table></div><div id="docketThankyou"><p class="docketThankyou"><strong>Thanks for your purchase!</strong></p></div><hr><div class="totalBCH"><img id="cheddrInvoiceFooter" src="images/bchlogoprint.png" height="64px"><h2>₿' + parseFloat(finalTotalBCH).toFixed(8)  + '</h2></div><div class="docketFooter">Sent To:</div><div class="docketAddress">' + paymentAddress + '</div></div><hr><div class="docketFooter">cheddr pos 0.4 alpha<br/> https://pos.cheddr.cash<br/> Proudly powered by Bitcoin Cash</div></div>';
+    var htmlTableRows = "";
+    $("#orderedItems").find('tr').each(function (i, el) {
+        var $tds = $(this).find('td'),
+            printItemName = $tds.eq(0).text(),
+            printItemPriceFiat = $tds.eq(1).text(),
+            printItemPriceBits = $tds.eq(2).text();
+            htmlTableRows += '<tr class="invoiceItemList"><td class="itemName">' + printItemName + '</td><td class="itemPriceFiat">' + printItemPriceFiat + '</td><td class="itemPriceBits">' + printItemPriceBits + '</td></tr>';
+    });
+
+    var html = htmlHeader + htmlBody + htmlTableRows + htmlFooter;
+    $('body').prepend(html);
+    toastr.remove();
     window.print();
+    $("#cheddrInvoice").remove();
 }
 
 updateSplashClock = function () {
@@ -259,6 +288,14 @@ function copyToClipboard(elem) {
         target.textContent = "";
     }
     return succeed;
+}
+
+//  RFC4122 version 4 compliant UUID
+function uuid() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+    })
 }
 
 // add thousands seperator to number
@@ -370,7 +407,7 @@ checkTransaction = function (orderTotalBCH) {
             $("#splashStatusDate").empty();
             $("#splashStatusDate").append('Last Transaction:<br/>₿' + parseFloat(orderTotalBCH).toFixed(8) + '<br/>' + transactionStart.toLocaleTimeString());
             
-            setTimeout(              // wait for tick animation (950ms)
+            setTimeout(              // wait for tick animation (800ms)
                 function() 
                 {
                     var printState = $("#orderPrint").hasClass("hollow"); 
@@ -380,7 +417,7 @@ checkTransaction = function (orderTotalBCH) {
                         orderPrint();
                         showSplash();
                     }
-                }, 950);
+                }, 900);
         } else {
             console.log("current:: " + currentTotal);
             console.log("expected:: " + expectedTotal);
