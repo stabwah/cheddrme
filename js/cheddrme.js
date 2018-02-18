@@ -1,31 +1,17 @@
 /********************************************************************
     cheddr.js
-    v0.4
+    v0.6
     github.com/stabwah/cheddrme
 ********************************************************************/
 
-/* 
-BCH API: https://bch.btc.com/api-doc
+/* maybe one day
+    https://bch-insight.blockexplorer.com/api/addr/qze4dyv6znt5h22dxqsejvfn47tz2ermeg62y4cdg6 -- doesnt work?
+    https://bch-chain.api.btc.com/v3/address/1HMFfEwYv6M4qMsKa2d7eQbFBtF4e4dFWk -- doesnt support cashaddr 
+    https://cashexplorer.bitcoin.com/api/addr/{address} -- doesn't support cashaddr
 
-maybe one day
-taken from https://github.com/simon-v/minipos/blob/master/bch.py
-
-// 'url': 'https://api.coinbase.com/v2/exchange-rates?currency=BCH',
-// 'price_key': 'data.rates.{cur}',
-
-'url': 'https://cashexplorer.bitcoin.com/api/addr/{address}',
-    'balance_key': 'balance',
-    'confirmed_key': None,
-    'unconfirmed_key': 'unconfirmedBalance',
-    'unit_satoshi': False,
-    'prefixes': '13',
-
-'url': 'https://bch-insight.bitpay.com/api/addr/{address}',
-    'balance_key': 'balance',
-    'confirmed_key': None,
-    'unconfirmed_key': 'unconfirmedBalance',
-    'unit_satoshi': False,
-    'prefixes': 'CH',
+following taken from https://github.com/simon-v/minipos/blob/master/bch.py
+    'url': 'https://api.coinbase.com/v2/exchange-rates?currency=BCH',
+    'price_key': 'data.rates.{cur}',
 */
 var exchangeUpdated = null;
 
@@ -83,22 +69,30 @@ function showSplash() {
 }
 
 function showMain() {
-    $("#mainForm").show();
-    $("#menubar").show();
-    $(".keypad").show();
-    $("#menubar").show();
-    $("#inputFields").show();
-    $("#settingsModal").hide(); 
-    $("#donateModal").hide();
-    $("#cheddrFooter").hide();
+    var checkFiatRate = $("#splashRate").val();
+    if(checkFiatRate === -1) {
+        getExchRate(fiat);
+    } else {
+        // only updated every 5 mins anyway
+        getExchRate(fiat);
 
-    $("#storeSplash").hide();
-    $("#settingsModal").hide(); 
-    $("#donateModal").hide();
-    $("#cheddrFooter").hide();
-    $("#qrbch").hide();
-    updateScreen(0);
-    resetOrderForm();
+        $("#mainForm").show();
+        $("#menubar").show();
+        $(".keypad").show();
+        $("#menubar").show();
+        $("#inputFields").show();
+        $("#settingsModal").hide(); 
+        $("#donateModal").hide();
+        $("#cheddrFooter").hide();
+
+        $("#storeSplash").hide();
+        $("#settingsModal").hide(); 
+        $("#donateModal").hide();
+        $("#cheddrFooter").hide();
+        $("#qrbch").hide();
+        updateScreen(0);
+        resetOrderForm();
+    }
 }
 
 function showSettings() {
@@ -145,6 +139,25 @@ function resetOrderForm() {
     $("#paymentCode").empty();
     $("#itemList").show();
     $("#orderFooter").show();
+
+    var checkSalesTax = $("#settingsSalesTax").val();
+    if (checkSalesTax > 0) {
+        $("#orderSubTotal").show();
+        $("#orderSalesTax").show();
+    } else { 
+        $("#orderSalesTax").hide();
+        $("#orderSubTotal").hide();
+    }
+
+    var checkDiscount = $("#settingsDiscount").val(); 
+    if (checkDiscount > 0) {
+        $("#orderSubTotal").show();
+        $("#orderDiscount").show();
+    } else {
+        $("#orderDiscount").hide();
+        $("#orderSubTotal").hide();
+    }
+
     updateTotals();
 }
 
@@ -169,7 +182,7 @@ function orderPrint() {
 
     var htmlHeader = '<div id="cheddrInvoice"><center id="cheddrInvoiceHeader"><div class="logo"><img src="images/receiptLogo.png" width="120px" height="120px"></div><div class="info"><h2>' + checkStore + '</h2></div></center><hr><div id="cheddrInvoiceSubHeader"><div class="info"><p>' + uuid() + '<br/>' + timeNow.toLocaleString() + '</p></div></div><br/>';
     var htmlBody = '<div id="cheddrInvoiceBody"><div id="table"><table><tr class="invoiceTitle"><td class="itemHeader"><h2>Item</h2></td><td class="fiatHeader"><h2>Price ($)</h2></td><td class="bitsHeader"><h2>Price (bits)</h2></td></tr>';
-    var htmlFooter = '<tr class="invoiceTotal"><td>Total</td><td class="totalFiat"><h2>' + fiatSymbol + parseFloat(finalTotal).toFixed(2) + '</h2></td><td class="totalBits"><h2>' + parseFloat(finalTotalBits).toFixed(2) + '</h2></td></tr></table></div><div id="docketThankyou"><p class="docketThankyou"><strong>Thanks for your purchase!</strong></p></div><hr><div class="totalBCH"><img id="cheddrInvoiceFooter" src="images/bchlogoprint.png" height="64px"><h2>₿' + parseFloat(finalTotalBCH).toFixed(8)  + '</h2></div><div class="docketFooter">Sent To:</div><div class="docketAddress">' + paymentAddress + '</div></div><hr><div class="docketFooter">cheddr pos 0.4 alpha<br/> https://pos.cheddr.cash<br/> Proudly powered by Bitcoin Cash</div></div>';
+    var htmlFooter = '<tr class="invoiceTotal"><td>Total</td><td class="totalFiat"><h2>' + fiatSymbol + parseFloat(finalTotal).toFixed(2) + '</h2></td><td class="totalBits"><h2>' + parseFloat(finalTotalBits).toFixed(2) + '</h2></td></tr></table></div><div id="docketThankyou"><p class="docketThankyou"><strong>Thanks for your purchase!</strong></p></div><hr><div class="totalBCH"><img id="cheddrInvoiceFooter" src="images/bchlogoprint.png" height="64px"><h2>₿' + parseFloat(finalTotalBCH).toFixed(8)  + '</h2></div><div class="docketFooter">Sent To:</div><div class="docketAddress">' + paymentAddress + '</div></div><hr><div class="docketFooter">cheddr pos 0.6 alpha<br/> https://pos.cheddr.cash<br/> Proudly powered by Bitcoin Cash</div></div>';
     var htmlTableRows = "";
     $("#orderedItems").find('tr').each(function (i, el) {
         var $tds = $(this).find('td'),
@@ -256,6 +269,7 @@ getExchRate = function (fiat) {
             var local = fiat.toString().toLowerCase();
             currentExchangeRate = data[0]['price_' + local];    
             if (currentExchangeRate > 0) {
+                $("#splashNewPayment").removeClass("disabled");
                 toastr.success('1 BCH = ' + fiatSymbol + parseFloat(currentExchangeRate).toFixed(2));
 
                 var splashUpdate = fiatSymbol + parseFloat(currentExchangeRate).toFixed(2) + '<br/>' + fiat + ' / BCH';
@@ -278,9 +292,7 @@ getExchRate = function (fiat) {
 };
 
 // get wallet details
-getInitials = function () {
-    var url =  "https://blockdozer.com/insight-api/addr/" + paymentAddress;
-
+getInitials = function (url) {
     $.get(url)
     .success( function(inData) {
           var intialUpdated = new Date($.now());
@@ -291,6 +303,7 @@ getInitials = function () {
           initialUnBalanceSat = inData["unconfirmedBalanceSat"]; 
           initialTxArrivals = inData["unconfirmedTxApperances"];
           initialTotal = parseFloat(initialBalance + initialUnBalance).toFixed(8);
+          $("#orderDone").removeClass("disabled");
           console.log("initial::" + initialTotal);
           clearInterval(intervalRateLimit);
         }, "json" )
@@ -300,9 +313,7 @@ getInitials = function () {
 };
 
 // check transaction
-checkTransaction = function (orderTotalBCH) {
-    var url = "https://blockdozer.com/insight-api/addr/" + paymentAddress;
-
+checkTransaction = function (url, orderTotalBCH) {
     $.get(url)
     .success( function(chkData) {
         var transactionStart = new Date($.now());
@@ -398,24 +409,63 @@ addItemToOrder = function(itemName = "") {
 
 // calculate totals
 updateTotals = function () {
+    var salesTaxFiat = 0;
+    var salesTaxBits = 0;
+    var bchDiscountFiat = 0;
+    var bchDiscountBits = 0;
+    var subTotalFiat = 0;
+    var subTotalBits = 0;
+
     updateTable();
-    var finalTotalBits = 0;
+
+    // calculate sub total bits
     $(".orderPriceBits").each(function() {
         orderPriceB = $(this).text().replace(',', '');
-        finalTotalBits += parseFloat(orderPriceB);
+        subTotalBits += parseFloat(orderPriceB);
     });
-    $("#orderTotalBits").text(thousands(finalTotalBits.toFixed(2)));
 
-    var finalTotalFiat = 0;
+    // calculate sub total fiat
     $(".orderPriceFiat").each(function() {
         orderPriceText = $(this).text().replace(fiatSymbol, '');
-        finalTotalFiat += parseFloat(orderPriceText);
+        subTotalFiat += parseFloat(orderPriceText);
     });
-    $("#orderTotalFiat").text(fiatSymbol + finalTotalFiat.toFixed(2));
-    finalTotal = finalTotalFiat;
 
-    finalTotalBCH = finalTotalBits / 1000000;
-    $("#orderTotalBCH").text('(₿' + finalTotalBCH.toFixed(8) + ')');
+    // add sales tax
+    var salesTax = $("#settingsSalesTax").val();
+    if (salesTax > 0) {
+        salesTax = parseFloat(salesTax / 100).toFixed(2);
+        salesTaxFiat = parseFloat(subTotalFiat * salesTax).toFixed(2);
+        salesTaxBits = parseFloat(subTotalBits * salesTax).toFixed(2);
+        $("#orderSalesTaxText").text("Sales Tax (" + (salesTax * 100) + "%)");
+        $("#orderSalesTaxFiat").text(fiatSymbol + salesTaxFiat);
+        $("#orderSalesTaxBits").text(thousands(salesTaxBits));
+    } 
+
+    // apply discount (yay!)
+    var bchDiscount = $("#settingsDiscount").val();
+    if (bchDiscount > 0) {
+        bchDiscount = parseFloat(bchDiscount / 100).toFixed(2);
+        bchDiscountFiat = parseFloat(subTotalFiat * bchDiscount).toFixed(2);
+        bchDiscountBits = parseFloat(subTotalBits * bchDiscount).toFixed(2);
+        $("#orderDiscountText").text((bchDiscount * 100) + "% Discount!");
+        $("#orderDiscountFiat").text(fiatSymbol + bchDiscountFiat);
+        $("#orderDiscountBits").text(thousands(bchDiscountBits));
+    }
+
+    subTotalFiat = parseFloat(subTotalFiat).toFixed(2);
+    subTotalBits = parseFloat(subTotalBits).toFixed(2);
+    // calculate total bits
+    var finalTotalBits = parseFloat(parseFloat(subTotalBits) + parseFloat(salesTaxBits) - parseFloat(bchDiscountBits)).toFixed(2);
+    // calculate total fiat
+    var finalTotalFiat = parseFloat(parseFloat(subTotalFiat) + parseFloat(salesTaxFiat) - parseFloat(bchDiscountFiat)).toFixed(2);
+    // convert total BCH
+    finalTotalBCH = parseFloat(finalTotalBits / 1000000).toFixed(8);
+
+    $("#orderSubTotalFiat").text(fiatSymbol + subTotalFiat);
+    $("#orderTotalFiat").text(fiatSymbol + finalTotalFiat);
+    $("#orderSubTotalBits").text(thousands(subTotalBits));
+    $("#orderTotalBits").text(thousands(finalTotalBits));
+    $("#orderTotalBCH").text('(₿' + finalTotalBCH + ')');
 };
 
 

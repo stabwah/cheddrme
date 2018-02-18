@@ -1,30 +1,90 @@
-BCH API: https://bch.btc.com/api-doc
+Changelog:
+
+    Mobile UI Improvements:
+        * Fixed bugs in tablet/phone views
+        * Hide keypad
+        * Use mobile keyboard instead of keypad (coming soon!)
+
+    General:
+        * Apply discount to all BCH orders
+        * Add sales tax to final total 
+        * Internationalization (coming soon with your help!)
+
+    Error Handling:
+        * Ensure exchange rate is set before allowing new order
+        * Check exchange rate before starting order (limited to once every 5 minutes)
+        * Checking initial address state before proceeding with transaction verification
+        * Fall-back to BitPay API (bch-insight.bitpay.com) for transacitons
 
 TODO:
-    - rate limit 
+    - investigate paybear.io integration
 
-    - printing:
-        open new page with invoice:
-        https://codepen.io/Sambra22/pen/JNexJP
-        https://github.com/sparksuite/simple-html-invoice-template
-        
-            var printPopup = window.open('', "Reciept", "menubar=0,location=0,height=800,width=400");
-            printPopup.write();
-            printPopup.focus();
-            setTimeout(function () { window.print(); }, 500);
-            window.onfocus = function () { setTimeout(function () { window.close(); }, 500); }
+    - add sales tax and discount to dockets
+    - sales tax 
+    Alaska 1.69%
+    Puerto Rico 10.5%
+    EU VAT 21.5%
+    India 28%
 
-        generate unique reciepts numbers: 
-            //  RFC4122 version 4 compliant UUID
-            function uuidv4() {
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-                return v.toString(16);
-            })
+    - improve rate limiting 
+    - rotate recieve addresses (xpub?)
 
-    - rotate recieve addresses
+    - hide keypad (for mobile)
+    // show/hide keypad
+    var $button = $('#button');
+    var $panel = $('#inputFields');
 
-    - calculate recommended transaction fee 
+    $button.click(function () {
+        if ($panel.is(':visible')) {
+            MotionUI.animateOut($panel, "slide-out-right");
+            $($panel).hide();
+        } else {
+            $($panel).show();
+            MotionUI.animateIn($panel, "slide-in-left");
+        }
+    });
 
-    - find local currency by html5 geolocation:
-    https://coliff.github.io/geoip-db-country-select/
+    - light/dark theme option
+    // dusk - http://es-di.com/sdcontent/foundation/dark/sd-ui-dark-foundation.zip
+    // dawn - http://es-di.com/sdcontent/foundation/gradient/sd-ui-gradient-foundation.zip
+    // change theme
+    $("#changeTheme").click(function () {
+        var value = $("settingsTheme").val();
+        if ($value === "dusk") {
+            $themeName = "darkui.css";
+        } else {
+            $themeName = "lightui.css";
+        }
+        $("link").attr("href", $themeName);
+        $.cookie("css", $themeName, {
+            expires: 365,
+            path: '/'
+        });
+    });
+
+    - calculate recommended transaction fee
+    /*  https://bitcointicker.co/bccnetworkstats/
+    Fee (bcc/kB) 2 blocks:         0.00000999          */
+    //
+    // recommended transaction fee to confirm payment within 2 blocks
+    // fee2blocks is populated by javascript =(
+    //
+    // https://github.com/Rob--W/cors-anywhere
+    // https://cors-anywhere.herokuapp.com/
+    //
+
+    $.ajax({
+        url: 'https://cors-anywhere.herokuapp.com/https://bitcointicker.co/bccnetworkstats/',
+        type: 'GET',
+        success: function(res) {
+            var findData = $(res).find('#fee2blocks').text();
+            var find2 = $(res.responseText).find('#fee2blocks').text();
+            var recommendFee = parseFloat(findData * 1000000).toFixed(2);
+            console.log(res);
+        }
+    });
+
+    - internationalization
+    https://github.com/wikimedia/jquery.i18n
+    https://phraseapp.com/blog/posts/jquery-i18n-the-advanced-guide/
+    

@@ -98,7 +98,6 @@
       });
 
       $("#splashNewPayment").click(function () {
-        // check last update time getExchRate(fiat);
         showMain();
       });
       /* end splash */
@@ -319,11 +318,20 @@
             intervalRateLimit = setInterval(function () {
               if (rateLimitAttempts < 3) { 
                   rateLimitAttempts += 1;
-                  getInitials();
+                  getInitials("https://blockdozer.com/insight-api/addr/" + paymentAddress);
                   } else {
                     // stop re-trying
                     clearInterval(intervalRateLimit);
-                    toastr.warning("Failed getting wallet details")
+                    rateLimitAttempts = 0;
+                    intervalRateLimit = setInterval(function () {
+                      if (rateLimitAttempts < 3) { 
+                        rateLimitAttempts += 1;
+                        getInitials("https://bch-insight.bitpay.com/api/addr/" + paymentAddress);
+                      } else {
+                        clearInterval(intervalRateLimit);
+                        toastr.warning("Failed getting wallet details")
+                      }
+                    }, 2500);
               }
             }, 2500);
           }
@@ -363,18 +371,28 @@
         intervalRateLimit = setInterval(function () {
           if (rateLimitAttempts < 5) { 
               rateLimitAttempts += 1;
-              checkTransaction(finalTotalBCH);
-              } else {
-                // stop re-trying
-                clearInterval(intervalRateLimit);
-                toastr.warning("Could not confirm transaction")
-
-                $("#summaryWaiter").hide();
-                $("#summaryWaiterText").hide();
-                $("#summaryQrCode").show();
-                $("#summaryFeeRecommend").show();
-                $("#orderCancel").show();
-                $("#orderDone").show();     
+              var url = "https://blockdozer.com/insight-api/addr/" + paymentAddress;
+              checkTransaction(url, finalTotalBCH);
+          } else {
+              clearInterval(intervalRateLimit);
+              rateLimitAttempts = 0;
+              intervalRateLimit = setInterval(function () {
+                  if (rateLimitAttempts < 5) { 
+                      rateLimitAttempts += 1;
+                      url = "https://bch-insight.bitpay.com/api/addr/" + paymentAddress;
+                      checkTransaction(url, finalTotalBCH);
+                  } else {                       
+                        // stop re-trying
+                        clearInterval(intervalRateLimit);
+                        toastr.warning("Could not confirm transaction")
+                        $("#summaryWaiter").hide();
+                        $("#summaryWaiterText").hide();
+                        $("#summaryQrCode").show();
+                        $("#summaryFeeRecommend").show();
+                        $("#orderCancel").show();
+                        $("#orderDone").show();     
+                  }
+                }, 2500);   
           }
         }, 2500);
       });
@@ -428,7 +446,7 @@
       <img class="store-profile-img" src="./images/backdrop.jpg" alt="picture of space" />
 
       <div style="position:absolute;left:1em;top:1em;">
-        <p id="splashRate" class="splash">42</p>
+        <p id="splashRate" class="splash">-1</p>
       </div>
 
       <div style="position:absolute;left:77%;top:0.5em;" id="blockchainExplorer">
@@ -462,7 +480,7 @@
       </div>
 
       <div class="store-profile-actions">
-        <a href="#" class="store-profile-button button success" id="splashNewPayment">New Payment</a>
+        <a href="#" class="store-profile-button button success disabled" id="splashNewPayment">New Payment</a>
       </div>
     </div>
   </div>
@@ -561,7 +579,7 @@
           <a class="button large-2 secondary" id="orderPrint">
               <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Print"><i class="fi-print"></i></span>
           </a>  
-          <a class="button large-2 success" id="orderDone">
+          <a class="button large-2 success disabled" id="orderDone">
             <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Verify"><i class="fi-check"></i></span>
           </a>
           <div id="summaryWaiterText">Looking for transaction...<br/><br/></div>
@@ -591,7 +609,62 @@
 
     <!-- totals -->
     <div class="medium-8 columns" id="orderFooter">
-      <div id="orderTotal">
+
+      <div id="orderSubTotal" class="row">
+          <div class="medium-4 columns">
+            <section>
+              <h4 class="orderSubTotal">Sub-Total</h4>
+            </section>
+          </div>
+          <div class="medium-4 columns">
+            <section>
+              <h4 class="orderSubTotal" id="orderSubTotalFiat">1&nbsp;</h4>
+            </section>
+          </div>
+          <div class="medium-4 columns">
+            <section>
+              <h4 class="orderSubTotal" id="orderSubTotalBits">2&nbsp;</h4>
+            </section>
+          </div>
+      </div>
+
+      <div id="orderSalesTax" class="row">
+          <div class="medium-4 columns">
+            <section>
+              <h4 class="orderSalesTax" id="orderSalesTaxText">Sales Tax</h4>
+            </section>
+          </div>
+          <div class="medium-4 columns">
+            <section>
+              <h4 class="orderSalesTax" id="orderSalesTaxFiat">1&nbsp;</h4>
+            </section>
+          </div>
+          <div class="medium-4 columns">
+            <section>
+              <h4 class="orderSalesTax" id="orderSalesTaxBits">2&nbsp;</h4>
+            </section>
+          </div>
+      </div>
+
+      <div id="orderDiscount" class="row">
+          <div class="medium-4 columns">
+            <section>
+              <h4 class="orderDiscount" id="orderDiscountText">Discount!</h4>
+            </section>
+          </div>
+          <div class="medium-4 columns">
+            <section>
+              <h4 class="orderDiscount" id="orderDiscountFiat">1&nbsp;</h4>
+            </section>
+          </div>
+          <div class="medium-4 columns">
+            <section>
+              <h4 class="orderDiscount" id="orderDiscountBits">2&nbsp;</h4>
+            </section>
+          </div>
+      </div>
+
+      <div id="orderTotal" class="row">
         <div class="medium-4 columns">
           <section>
             <h2 class="orderTotal">Total</h2>
@@ -669,12 +742,23 @@
         </label>
         <label>Store Name
             <div class="input-group">
-              <span class="input-group-label">
-                <i class="fi-flag"></i>
-              </span>
               <input id="inputStoreName" class="input-group-field" type="text" placeholder="Your Store Name (Optional)">
             </div>
         </label>
+
+        <div class="medium-6 columns">
+          <label>Sales Tax (%)</label>
+          <div class="input-group">
+            <input class="input-group-field" type="number" value="0" id="settingsSalesTax">
+          </div>
+        </div>
+
+        <div class="medium-6 columns">
+          <label>BCH Discount (%)</label>
+          <div class="input-group">
+            <input class="input-group-field" type="number" value="0" id="settingsDiscount">
+          </div>
+        </div>
 
         <label>Printing<br/>
           <select id="settingsPrint" style="width: 8em;">
@@ -706,7 +790,7 @@
 
  <!-- start footer -->
  <div id="cheddrFooter" class="row align-center medium-unstack medium-2 large-2 text-center">
-    cheddr pos 0.4a<hr>
+    cheddr pos 0.6a<hr>
     <div class="medium-12 large-12 medium-unstack align-center columns text-center">
         <section>
             <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Donate!"><a href="#donateModal" rel="modal:open"><img src="./images/main_ico_donate.png" id="showDonate" alt="Donate" width="38px"></a></span>

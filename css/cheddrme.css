@@ -208,7 +208,27 @@ body {
   width: 20em;
 }
 
+#inputStoreName {
+  width: 15em;
+}
+
+#settingsSalesTax, #settingsDiscount {
+  align-self: left;
+  width: 4em;
+}
+
 /* main form (order page) */ 
+.orderSubTotal {
+  border: 0;
+}
+
+.orderSalesTax {
+  color: rgba(255, 255, 255, 1);
+}
+
+.orderDiscount {
+  color: rgba(255, 255, 255, 1);
+}
 
 .orderTotal {
   color: rgba(255, 255, 255, 1);
