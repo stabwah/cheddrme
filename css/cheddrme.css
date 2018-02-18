@@ -44,6 +44,31 @@ body {
   color: #d3d3d3;
 }
 
+#finalTotal {
+  background-color: #5cb85c;
+  font-size: 1.22em;
+  line-height: 1.22em;
+}
+
+#transFeeRecommended {
+  background-color: #5cb85c;
+  font-size: 0.9em;
+  line-height: 0.9em;
+}
+
+#paymentCode {
+  margin-top: -0.6em;
+}
+
+/*
+.input-group {
+  max-width: 32em;
+}
+
+.input-group-field {
+  width: 100%;
+} */
+
 .hearty { 
   font-size: 40px;
   color: #E33100;

@@ -1,48 +1,28 @@
 Changelog:
 
-    Mobile UI Improvements:
+    UI Improvements:
         * Fixed bugs in tablet/phone views
-        * Hide keypad
+        * Hide keypad on checkout
+        * Recommended transaction fee clearer
         * Use mobile keyboard instead of keypad (coming soon!)
 
     General:
-        * Apply discount to all BCH orders
-        * Add sales tax to final total 
+        * Apply discount to all BCH orders (optional)
+        * Added sales tax
+        * Recommended transaction fee to confirm payment within 2 blocks 
         * Internationalization (coming soon with your help!)
 
     Error Handling:
         * Ensure exchange rate is set before allowing new order
         * Check exchange rate before starting order (limited to once every 5 minutes)
         * Checking initial address state before proceeding with transaction verification
-        * Fall-back to BitPay API (bch-insight.bitpay.com) for transacitons
+        * Fallback to BitPay for transacitons (on blockdozer failure)
+        * Fallback to cryptocompare for currency exchange (on coinmarketcap failure)
 
 TODO:
     - investigate paybear.io integration
-
-    - add sales tax and discount to dockets
-    - sales tax 
-    Alaska 1.69%
-    Puerto Rico 10.5%
-    EU VAT 21.5%
-    India 28%
-
     - improve rate limiting 
     - rotate recieve addresses (xpub?)
-
-    - hide keypad (for mobile)
-    // show/hide keypad
-    var $button = $('#button');
-    var $panel = $('#inputFields');
-
-    $button.click(function () {
-        if ($panel.is(':visible')) {
-            MotionUI.animateOut($panel, "slide-out-right");
-            $($panel).hide();
-        } else {
-            $($panel).show();
-            MotionUI.animateIn($panel, "slide-in-left");
-        }
-    });
 
     - light/dark theme option
     // dusk - http://es-di.com/sdcontent/foundation/dark/sd-ui-dark-foundation.zip

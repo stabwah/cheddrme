@@ -19,13 +19,12 @@
   <meta name="msapplication-config" content="images/favicons/browserconfig.xml">
   <meta name="theme-color" content="#ffffff">
 
-  <!-- <script type="text/javascript" src="js/jquery.js"></script> replaced with cloudflare SRI URL -->
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.js" integrity="sha256-siFczlgw4jULnUICcdm9gjQPZkw/YPDqhQ9+nAOScE4=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/foundation/6.4.3/js/foundation.min.js" integrity="sha256-mRYlCu5EG+ouD07WxLF8v4ZAZYCA6WrmdIXyn1Bv9Vk=" crossorigin="anonymous"></script>
-  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/kjua@0.1.2/dist/kjua.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/2.1.4/toastr.min.js" integrity="sha256-yNbKY1y6h2rbVcQtf0b8lq4a+xpktyFc3pSYoGAY1qQ=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js" integrity="sha256-0rguYS0qgS6L4qVzANq4kjxPLtvnp5nn2nB5G1lWRv4=" crossorigin="anonymous"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js" integrity="sha256-p+jtLXu9vK7u6Bw0M/BX1koywAARK70JtZafxljQplU=" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/kjua@0.1.2/dist/kjua.min.js"></script>
   <script type="text/javascript" src="js/bchaddrjs-0.1.4.js"></script>
   <script type="text/javascript" src="js/cheddrme.js"></script>
   
@@ -41,7 +40,7 @@
     var fiat = "AUD";
     var currentExchangeRate = 0;
     var transFee = 0;
-    var transFeeBCH = 0.00000681;
+    var transFeeBCH = 0.00000999;           // recommended transaction fee to confirm payment within 2 blocks >> https://bitcointicker.co/bccnetworkstats/
     var transFeeBits = parseFloat(transFeeBCH * 1000000).toFixed(2);
     var subTotal = 0;
     var finalTotal = 0;
@@ -53,13 +52,17 @@
     var currentEntry = "0";
     var intervalTransCheck = "";
     var printPref = "";
+    var savedSalesTax = 0;
+    var savedDiscount = 0;
     var itemOrig = "";
 
     $(document).ready(function () {
       var checkSaved = localStorage.getItem("cheddrAddress");
       var checkFiat = localStorage.getItem("cheddrFiat");
       var checkStore = localStorage.getItem("cheddrStoreName");
-      var checkPrint = localStorage.getItem("cheddrPrintPref");
+      printPref = localStorage.getItem("cheddrPrintPref");
+      savedSalesTax = localStorage.getItem("cheddrSalesTax");
+      savedDiscount = localStorage.getItem("cheddrDiscount");
 
       if (checkFiat != null) {
         fiat = checkFiat;
@@ -172,8 +175,16 @@
               }
               printPref = $("#settingsPrint").val();
               localStorage.setItem("cheddrPrintPref",printPref);
+
+              savedSalesTax = $("#settingsSalesTax").val();
+              localStorage.setItem("cheddrSalesTax",savedSalesTax);
+
+              savedDiscount = $("#settingsDiscount").val();
+              localStorage.setItem("cheddrDiscount",savedDiscount);
+
               var blockExplorerUrl = "https://explorer.bitcoin.com/bch/address/" + paymentAddress;
               $("#blockchainExplorerLink").attr("href", blockExplorerUrl);
+
               showSplash();
           }
         } else {
@@ -291,27 +302,30 @@
             $('#orderPrint').addClass("hollow");
           }
 
+          $("#inputFields").hide();
           $("#itemList").hide();
+          $("#orderFooter").removeClass("columns");
+          $("#orderFooter").addClass("rows");
 
           var specificAmount = paymentAddress + '?amount=' + parseFloat(finalTotalBCH).toFixed(8);
           var qrcode = kjua({
             text: specificAmount,
             ecLevel: 'H',
-            size: 198,
+            size: 256,
             rounded: 100,
             quiet: 0,
             mSize: 26,
             mPosX: 50,
             mPosY: 50,
             // TODO: issues reported with bitcoin.com wallet
-            //image: document.getElementById('qrbch'),
-            //mode: 'image',
+            image: document.getElementById('qrbch'),
+            mode: 'image',
             //fill: '#3cad66' // green matches logo
           });
           if ($("#paymentCode").is(':empty')) {
             $("#paymentTitle").empty();
-            $("#paymentTitle").append('Please transfer <span class="success label finalTotal">₿' +
-              parseFloat(finalTotalBCH).toFixed(8) + '</span> to:');
+            $("#paymentTitle").append('Please send <span class="success label finalTotal" id="finalTotal">₿' +
+              parseFloat(finalTotalBCH).toFixed(8) + '</span> to');
             $("#paymentCode").append(qrcode);
             $("#paymentAddress").val(paymentAddress);
             var rateLimitAttempts = 0;
@@ -348,11 +362,13 @@
           } else {
             $('#orderPrint').addClass("hollow");
           }
-          //orderPrint();
       });
 
       $("#orderCancel").click(function () {
+        $("#inputFields").show();
         $("#itemList").show();
+        $("#orderFooter").addClass("columns");
+        $("#orderFooter").removeClass("rows");
         $("#paymentSummary").hide();
         $("#paymentCode").empty();
       });
@@ -369,7 +385,7 @@
 
         var rateLimitAttempts = 0;
         intervalRateLimit = setInterval(function () {
-          if (rateLimitAttempts < 5) { 
+          if (rateLimitAttempts < 3) { 
               rateLimitAttempts += 1;
               var url = "https://blockdozer.com/insight-api/addr/" + paymentAddress;
               checkTransaction(url, finalTotalBCH);
@@ -377,7 +393,7 @@
               clearInterval(intervalRateLimit);
               rateLimitAttempts = 0;
               intervalRateLimit = setInterval(function () {
-                  if (rateLimitAttempts < 5) { 
+                  if (rateLimitAttempts < 3) { 
                       rateLimitAttempts += 1;
                       url = "https://bch-insight.bitpay.com/api/addr/" + paymentAddress;
                       checkTransaction(url, finalTotalBCH);
@@ -392,9 +408,9 @@
                         $("#orderCancel").show();
                         $("#orderDone").show();     
                   }
-                }, 2500);   
+                }, 2000);   
           }
-        }, 2500);
+        }, 2000);
       });
 
       $("#copyPaymentAddress").click(function () {
@@ -472,7 +488,7 @@
         <div class="store-profile-avatar">
             <a href="https://www.bitcoincash.org" target="_blank"><img src="./images/bchlogo256.png"/></a>
         </div>
-
+        <br/>
         <p class="splashStoreName" id="splashStoreName"></p>
         <p id="splashStatus"></p>
 
@@ -564,12 +580,12 @@
           </div>
           
         <div id="summaryQrCode">
-          <p>or scan QR Code:</p>
+          <p>or scan QR Code</p>
           <p id="paymentCode"></p>
         </div>
         <div id="summaryFeeRecommend">
           <span id="transactionFee"></span>
-          <span class="warning round radius label" id="transFeeRecommended"></span> bits per kilobyte
+          <span data-tooltip aria-haspopup="true" class="has-tip" data-disable-hover="false" tabindex="1" title="Recommended transaction fee to confirm payment within 2 blocks"><span class="success round radius label" id="transFeeRecommended">&nbsp;</span></span> bits per kilobyte
         </div>
         <hr>
         <div>
@@ -605,10 +621,9 @@
     </div>
     <!-- end order summary -->
 
-    <hr>
-
     <!-- totals -->
     <div class="medium-8 columns" id="orderFooter">
+      <hr>
 
       <div id="orderSubTotal" class="row">
           <div class="medium-4 columns">
@@ -760,20 +775,25 @@
           </div>
         </div>
 
-        <label>Printing<br/>
-          <select id="settingsPrint" style="width: 8em;">
-            <option value="Always">Always</option>
-            <option selected="selected" value="Manual">Manual</option>
-          </select>
-          
-        </label>
-  <!--
-        <fieldset class="large-6 cell">
-          <legend>Print Format</legend>
-          <input type="radio" name="settingsPrintFormat" value="A4" id="printFormatA4" required><label for="printFormatA4">A4</label>
-          <input type="radio" name="settingsPrintFormat" value="44" id="printFormat44"><label for="printFormat44">44mm</label>
-        </fieldset>
-  -->
+        <div> <!-- class="medium-6 columns"> -->
+          <label>Printing<br/>
+            <select id="settingsPrint" style="width: 8em;">
+              <option value="Always">Always</option>
+              <option selected="selected" value="Manual">Manual</option>
+            </select>
+          </label>
+        </div>
+      <!--
+        <div class="medium-6 columns">
+          <label>Print Format<br/>
+            <select id="settingsPrintFormat" style="width: 8em;">
+              <option value="A4" selected="selected" >A4</option>
+              <option value="44">44mm</option>
+            </select>
+            </label>
+        </div>
+      -->
+
         <hr>  
         <div class="input-group-button">
         <a class="button warning hollow large-2" id="cancelSettings">
