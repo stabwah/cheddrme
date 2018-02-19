@@ -1,6 +1,6 @@
 /********************************************************************
     cheddr.js
-    v0.7
+    v0.8
     github.com/stabwah/cheddrme
 ********************************************************************/
 
@@ -164,6 +164,23 @@ function resetOrderForm() {
 }
 
 function orderPrint() {
+    var salesTax = savedSalesTax;
+    var bchDiscount = savedDiscount;
+    var salesTaxFiat = $("#orderSalesTaxFiat").text();
+    var salesTaxBits = $("#orderSalesTaxBits").text();
+    var bchDiscountFiat = $("#orderDiscountFiat").text();
+    var bchDiscountBits = $("#orderDiscountBits").text();
+    var subTotalFiat = $("#orderSubTotalFiat").text();
+    var subTotalBits = $("#orderSubTotalBits").text();
+    var finalTotalBits = $("#orderTotalBits").text();
+    var checkStore = localStorage.getItem("cheddrStoreName");
+    var timeNow = new Date($.now());
+
+    var htmlHeader = '<div id="cheddrInvoice"><center id="cheddrInvoiceHeader"><div class="logo"><img src="images/receiptLogo.png" width="120px" height="120px"></div><div class="info"><h2>' + checkStore + '</h2></div></center><hr><div id="cheddrInvoiceSubHeader"><div class="info"><p>' + uuid() + '<br/>' + timeNow.toLocaleString() + '</p></div></div><br/>';
+    var htmlBody = '<div id="cheddrInvoiceBody"><div id="table"><table><tr class="invoiceTitle"><td class="itemHeader"><h2>Item</h2></td><td class="fiatHeader"><h2>Price ($)</h2></td><td class="bitsHeader"><h2>Price (bits)</h2></td></tr>';
+    var htmlTotals = '<tr class="invoiceTotal"><td>Total</td><td class="totalFiat"><h2>' + fiatSymbol + finalTotal + '</h2></td><td class="totalBits"><h2>' + finalTotalBits + '</h2></td></tr>';
+    var htmlFooter = '</table></div><div id="docketThankyou"><p class="docketThankyou"><strong>Thanks for your purchase!</strong></p></div><hr><div class="totalBCH"><img id="cheddrInvoiceFooter" src="images/bchlogoprint.png" height="64px"><h2>₿' + finalTotalBCH  + '</h2></div><div class="docketFooter">Sent To:</div><div class="docketAddress">' + paymentAddress + '</div></div><hr><div class="docketFooter">cheddr pos 0.8 alpha<br/> https://pos.cheddr.cash<br/> Proudly powered by Bitcoin Cash</div></div>';
+
     $("#orderFooter").hide();
     $(".keypad").hide();
     $("#paymentTitle").hide();
@@ -179,14 +196,6 @@ function orderPrint() {
     $("#donateModal").hide();
     $("#cheddrFooter").hide();
 
-    var checkStore = localStorage.getItem("cheddrStoreName");
-    var timeNow = new Date($.now());
-
-    var htmlHeader = '<div id="cheddrInvoice"><center id="cheddrInvoiceHeader"><div class="logo"><img src="images/receiptLogo.png" width="120px" height="120px"></div><div class="info"><h2>' + checkStore + '</h2></div></center><hr><div id="cheddrInvoiceSubHeader"><div class="info"><p>' + uuid() + '<br/>' + timeNow.toLocaleString() + '</p></div></div><br/>';
-    var htmlBody = '<div id="cheddrInvoiceBody"><div id="table"><table><tr class="invoiceTitle"><td class="itemHeader"><h2>Item</h2></td><td class="fiatHeader"><h2>Price ($)</h2></td><td class="bitsHeader"><h2>Price (bits)</h2></td></tr>';
-    var htmlTotals = '<tr class="invoiceTotal"><td>Total</td><td class="totalFiat"><h2>' + fiatSymbol + parseFloat(finalTotal).toFixed(2) + '</h2></td><td class="totalBits"><h2>' + parseFloat(finalTotalBits).toFixed(2) + '</h2></td></tr>';
-    var htmlFooter = '</table></div><div id="docketThankyou"><p class="docketThankyou"><strong>Thanks for your purchase!</strong></p></div><hr><div class="totalBCH"><img id="cheddrInvoiceFooter" src="images/bchlogoprint.png" height="64px"><h2>₿' + parseFloat(finalTotalBCH).toFixed(8)  + '</h2></div><div class="docketFooter">Sent To:</div><div class="docketAddress">' + paymentAddress + '</div></div><hr><div class="docketFooter">cheddr pos 0.6 alpha<br/> https://pos.cheddr.cash<br/> Proudly powered by Bitcoin Cash</div></div>';
-
     var htmlTableRows = "";
     $("#orderedItems").find('tr').each(function (i, el) {
         var $tds = $(this).find('td'),
@@ -197,14 +206,10 @@ function orderPrint() {
     });
 
     var html = htmlHeader + htmlBody + htmlTableRows;
-    var salesTax = savedSalesTax;
-    var bchDiscount = savedDiscount;
-    var salesTaxFiat = $("#orderSalesTaxFiat").text();
-    var salesTaxBits = $("#orderSalesTaxBits").text();
-    var bchDiscountFiat = $("#orderDiscountFiat").text();
-    var bchDiscountBits = $("#orderDiscountBits").text();
-    var subTotalFiat = $("#orderSubTotalFiat").text();
-    var subTotalBits = $("#orderSubTotalBits").text();
+    if (salesTax > 0 || bchDiscount > 0) {
+        var htmlSubTotal = '<tr class="invoiceSubTotal"><td>Sub-Total</td><td class="subTotalFiat"><h2>' + subTotalFiat + '</h2></td><td class="subTotalBits"><h2>' + subTotalBits + '</h2></td></tr>';
+        html += htmlSubTotal;
+    }
     if (salesTax > 0) {
         var htmlSalesTax = '<tr class="invoiceSalesTax"><td>Sales Tax</td><td class="salesTaxFiat"><h2>' + salesTaxFiat + '</h2></td><td class="salesTaxBits"><h2>' + salesTaxBits + '</h2></td></tr>';
         html += htmlSalesTax;
@@ -213,14 +218,13 @@ function orderPrint() {
         var htmlDiscount = '<tr class="invoiceDiscount"><td>Bitcoin Cash Discount</td><td class="bchDiscountFiat"><h2>' + bchDiscountFiat + '</h2></td><td class="bchDiscountBits"><h2>' + bchDiscountBits + '</h2></td></tr>';
         html += htmlDiscount;
     }
-    if (salesTax > 0 || bchDiscount > 0) {
-        var htmlSubTotal = '<tr class="invoiceSubTotal"><td>Sub-Total</td><td class="subTotalFiat"><h2>' + subTotalFiat + '</h2></td><td class="subTotalBits"><h2>' + subTotalBits + '</h2></td></tr>';
-        html += htmlSubTotal;
-    }
+
     html += htmlTotals + htmlFooter;
     $('body').prepend(html);
     toastr.remove();
+
     window.print();
+
     $("#cheddrInvoice").remove();
 }
 
@@ -377,10 +381,10 @@ checkTransaction = function (url, orderTotalBCH) {
         currentUnBalanceSat = chkData["unconfirmedBalanceSat"];
         currentTxArrivals = chkData["unconfirmedTxApperances"];
         currentTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
-        expectedTotal = parseFloat(initialBalance + orderTotalBCH).toFixed(8);
+        //expectedTotal = parseFloat(initialBalance + orderTotalBCH).toFixed(8);
         // #DEBUG 
         // by-pass transaction check for print testing
-        //expectedTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
+        expectedTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
         // #DEBUG 
         if (currentTotal >= expectedTotal) {                    // && currentTxArrivals = initialTxArrivals + 1 TODO
             // stop checking api
@@ -434,17 +438,10 @@ updateTable = function () {
 addItemToOrder = function(itemName = "") {
     var itemPrice = parseFloat($("#mainDisplay").val()).toFixed(2);
     var itemPriceBCH = 0;
+
     if (itemPrice > 0) {       
-        subTotal = parseFloat(subTotal) + parseFloat(itemPrice);
-        finalTotal = parseFloat(subTotal);
-
-        itemPriceBCH = (parseFloat(itemPrice) / parseFloat(currentExchangeRate)).toFixed(10);
-        subTotalBCH = parseFloat(subTotalBCH) + parseFloat(itemPriceBCH);
-        finalTotalBCH = parseFloat(subTotalBCH);
-
+        itemPriceBCH = parseFloat(itemPrice / currentExchangeRate).toFixed(8);
         itemPriceBits = parseFloat(itemPriceBCH * 1000000).toFixed(2);
-        subTotalBits = parseFloat(subTotalBCH * 1000000).toFixed(2);
-        finalTotalBits = parseFloat(finalTotalBCH * 1000000).toFixed(2);
 
         $("#orderedItems").append(
         '<tr class="orderItem"><td>' + 
@@ -513,6 +510,7 @@ updateTotals = function () {
     finalTotalFiat = parseFloat(parseFloat(subTotalFiat) + parseFloat(salesTaxFiat) - parseFloat(bchDiscountFiat)).toFixed(2);
     // convert total BCH
     finalTotalBCH = parseFloat(finalTotalBits / 1000000).toFixed(8);
+    finalTotal = finalTotalFiat;
 
     $("#orderSubTotalFiat").text(fiatSymbol + subTotalFiat);
     $("#orderTotalFiat").text(fiatSymbol + finalTotalFiat);

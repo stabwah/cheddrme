@@ -435,17 +435,33 @@ th {
   text-align: right;
 }
 #cheddrInvoice .invoiceSubTotal {
-  font-size: 0.9em;
+  text-align: left;
   line-height: 0.5em;
   background: rgb(241, 241, 241);
 }
-#cheddrInvoice .taxFiat, .taxBits {
-  font-size: 1em;
+#cheddrInvoice .subTotalFiat, .subTotalBits {
+  text-align: right;
+  font-size: 0.8em;
+}
+#cheddrInvoice .invoiceSalesTax {
+  text-align: left;
+}
+#cheddrInvoice .salesTaxFiat, .salesTaxBits {
+  font-size: 0.7em;
   text-align: right;
 }
-#cheddrInvoice .totalFiat, .totalBits {
-  font-size: 1em;
+#cheddrInvoice .invoiceDiscount {
+  text-align: left;
+} 
+#cheddrInvoice .bchDiscountFiat, .bchDiscountBits {
+  font-size: 0.9em;
   text-align: right;
+  font-weight: bold;
+}
+#cheddrInvoice .totalFiat, .totalBits {
+  font-size: 1.1em;
+  text-align: right;
+  font-weight: bold;
 }
 #cheddrInvoice .invoiceTotal {
   font-size: 1.1em;

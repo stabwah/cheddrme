@@ -20,6 +20,7 @@ Changelog:
         * Fallback to cryptocompare for currency exchange (on coinmarketcap failure)
 
 TODO:
+    - upload store logo (for printing)
     - investigate paybear.io integration
     - improve rate limiting 
     - rotate recieve addresses (xpub?)
