@@ -21,9 +21,12 @@ Changelog:
 
 TODO:
     - upload store logo (for printing)
-    - investigate paybear.io integration
-    - improve rate limiting 
-    - rotate recieve addresses (xpub?)
+        https://blueimp.github.io/jQuery-File-Upload/jquery-ui.html
+        
+    - autocomplete inputs:
+        http://easyautocomplete.com/guide
+        https://github.com/running-coder/jquery-typeahead
+        http://www.runningcoder.org/jquerytypeahead/demo/
 
     - light/dark theme option
     // dusk - http://es-di.com/sdcontent/foundation/dark/sd-ui-dark-foundation.zip
@@ -68,4 +71,7 @@ TODO:
     - internationalization
     https://github.com/wikimedia/jquery.i18n
     https://phraseapp.com/blog/posts/jquery-i18n-the-advanced-guide/
-    
+
+    - investigate paybear.io integration
+    - improve rate limiting 
+    - rotate recieve addresses (xpub?)

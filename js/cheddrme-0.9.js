@@ -1,20 +1,23 @@
 /********************************************************************
     cheddr.js
-    v0.8
+    v1.0 beta
     github.com/stabwah/cheddrme
 ********************************************************************/
 
-/*  
-    maybe one day
-    https://bitcoincash.blockexplorer.com/api/addr/1HMFfEwYv6M4qMsKa2d7eQbFBtF4e4dFWk -- doesnt support cashaddr
-    https://cashexplorer.bitcoin.com/api/addr/1HMFfEwYv6M4qMsKa2d7eQbFBtF4e4dFWk -- doesn't support cashaddr
+/*****************************************************************************************************************
+ * 
+ *  maybe one day
+ *  https://bitcoincash.blockexplorer.com/api/addr/1HMFfEwYv6M4qMsKa2d7eQbFBtF4e4dFWk -- doesnt support cashaddr
+ *  https://cashexplorer.bitcoin.com/api/addr/1HMFfEwYv6M4qMsKa2d7eQbFBtF4e4dFWk -- doesn't support cashaddr
+ * 
+ *  https://bch-chain.api.btc.com/v3/address/1HMFfEwYv6M4qMsKa2d7eQbFBtF4e4dFWk -- doesnt support cashaddr, not insight api
+ * 
+ * following taken from https://github.com/simon-v/minipos/blob/master/bch.py
+ * https://api.coinbase.com/v2/exchange-rates?currency=BCH',
+ * 
+ *****************************************************************************************************************/
 
-    https://bch-chain.api.btc.com/v3/address/1HMFfEwYv6M4qMsKa2d7eQbFBtF4e4dFWk -- doesnt support cashaddr, not insight api
-
-following taken from https://github.com/simon-v/minipos/blob/master/bch.py
-    'url': 'https://api.coinbase.com/v2/exchange-rates?currency=BCH',
-    'price_key': 'data.rates.{cur}',
-*/
+var cheddrVersion = "v1.0 beta";
 var exchangeUpdated = null;
 
 var initialBalance = 0;
@@ -179,7 +182,7 @@ function orderPrint() {
     var htmlHeader = '<div id="cheddrInvoice"><center id="cheddrInvoiceHeader"><div class="logo"><img src="images/receiptLogo.png" width="120px" height="120px"></div><div class="info"><h2>' + checkStore + '</h2></div></center><hr><div id="cheddrInvoiceSubHeader"><div class="info"><p>' + uuid() + '<br/>' + timeNow.toLocaleString() + '</p></div></div><br/>';
     var htmlBody = '<div id="cheddrInvoiceBody"><div id="table"><table><tr class="invoiceTitle"><td class="itemHeader"><h2>Item</h2></td><td class="fiatHeader"><h2>Price ($)</h2></td><td class="bitsHeader"><h2>Price (bits)</h2></td></tr>';
     var htmlTotals = '<tr class="invoiceTotal"><td>Total</td><td class="totalFiat"><h2>' + fiatSymbol + finalTotal + '</h2></td><td class="totalBits"><h2>' + finalTotalBits + '</h2></td></tr>';
-    var htmlFooter = '</table></div><div id="docketThankyou"><p class="docketThankyou"><strong>Thanks for your purchase!</strong></p></div><hr><div class="totalBCH"><img id="cheddrInvoiceFooter" src="images/bchlogoprint.png" height="64px"><h2>₿' + finalTotalBCH  + '</h2></div><div class="docketFooter">Sent To:</div><div class="docketAddress">' + paymentAddress + '</div></div><hr><div class="docketFooter">cheddr pos 0.8 alpha<br/> https://pos.cheddr.cash<br/> Proudly powered by Bitcoin Cash</div></div>';
+    var htmlFooter = '</table></div><div id="docketThankyou"><p class="docketThankyou"><strong>Thanks for your purchase!</strong></p></div><hr><div class="totalBCH"><img id="cheddrInvoiceFooter" src="images/bchlogoprint.png" height="64px"><h2>₿' + finalTotalBCH  + '</h2></div><div class="docketFooter">Sent To:</div><div class="docketAddress">' + paymentAddress + '</div></div><hr><div class="docketFooter">cheddr pos ' + cheddrVersion + '<br/> https://pos.cheddr.cash<br/> Proudly powered by Bitcoin Cash</div></div>';
 
     $("#orderFooter").hide();
     $(".keypad").hide();
@@ -415,7 +418,6 @@ checkTransaction = function (url, orderTotalBCH) {
     });
 };
 
-
 // update POS display
 updateScreen = function (displayValue) {
     var display = displayValue.toString();
@@ -515,7 +517,6 @@ updateTotals = function () {
     $("#orderTotalBits").text(thousands(finalTotalBits));
     $("#orderTotalBCH").text('(₿' + finalTotalBCH + ')');
 };
-
 
 function copyToClipboard(elem) {
     // create hidden text element, if it doesn't already exist
