@@ -372,6 +372,8 @@ getInitials = function (url) {
 
 // check transaction
 checkTransaction = function (url, orderTotalBCH) {
+    expectedTotal = parseFloat(initialBalance) + parseFloat(orderTotalBCH);
+    expectedTotal = parseFloat(expectedTotal).toFixed(8);
     $.get(url)
     .success( function(chkData) {
         var transactionStart = new Date($.now());
@@ -381,11 +383,6 @@ checkTransaction = function (url, orderTotalBCH) {
         currentUnBalanceSat = chkData["unconfirmedBalanceSat"];
         currentTxArrivals = chkData["unconfirmedTxApperances"];
         currentTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
-        expectedTotal = parseFloat(initialBalance + orderTotalBCH).toFixed(8);
-        // #DEBUG 
-        // by-pass transaction check for print testing
-        //expectedTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
-        // #DEBUG 
         if (currentTotal >= expectedTotal) {                    // && currentTxArrivals = initialTxArrivals + 1 TODO
             // stop checking api
             clearInterval(intervalRateLimit);

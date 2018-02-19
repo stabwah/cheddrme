@@ -294,6 +294,7 @@
       $("#orderCheckout").click(function () {
         $("#addToOrder").click();
         if (finalTotalBCH > 0) {
+          finalTotalBCH = parseFloat(finalTotalBCH).toFixed(8);
           $("#paymentSummary").show();
 
           if(printPref === "Always") {
@@ -307,7 +308,7 @@
           $("#orderFooter").removeClass("columns");
           $("#orderFooter").addClass("rows");
 
-          var specificAmount = paymentAddress + '?amount=' + parseFloat(finalTotalBCH).toFixed(8);
+          var specificAmount = paymentAddress + '?amount=' + finalTotalBCH;
           var qrcode = kjua({
             text: specificAmount,
             ecLevel: 'H',
