@@ -8,7 +8,7 @@ Changelog:
 
     General:
         * Apply discount to all BCH orders (optional)
-        * Added sales tax
+        * Added sales tax (optional)
         * Recommended transaction fee to confirm payment within 2 blocks 
         * Internationalization (coming soon with your help!)
 
