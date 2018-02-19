@@ -381,10 +381,10 @@ checkTransaction = function (url, orderTotalBCH) {
         currentUnBalanceSat = chkData["unconfirmedBalanceSat"];
         currentTxArrivals = chkData["unconfirmedTxApperances"];
         currentTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
-        //expectedTotal = parseFloat(initialBalance + orderTotalBCH).toFixed(8);
+        expectedTotal = parseFloat(initialBalance + orderTotalBCH).toFixed(8);
         // #DEBUG 
         // by-pass transaction check for print testing
-        expectedTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
+        //expectedTotal = parseFloat(currentBalance + currentUnBalance).toFixed(8);
         // #DEBUG 
         if (currentTotal >= expectedTotal) {                    // && currentTxArrivals = initialTxArrivals + 1 TODO
             // stop checking api
