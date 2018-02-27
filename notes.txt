@@ -1,26 +1,3 @@
-Open-source and free (donations welcome however we won't ever take a cut out of every transaction like moosh.io)
-
-Changelog:
-
-    UI Improvements:
-        * Fixed bugs in tablet/phone views
-        * Hide keypad on checkout
-        * Recommended transaction fee clearer
-        * Use mobile keyboard instead of keypad (coming soon!)
-
-    General:
-        * Apply discount to all BCH orders (optional)
-        * Added sales tax (optional)
-        * Recommended transaction fee to confirm payment within 2 blocks 
-        * Internationalization (coming soon with your help!)
-
-    Error Handling:
-        * Ensure exchange rate is set before allowing new order
-        * Check exchange rate before starting order (limited to once every 5 minutes)
-        * Checking initial address state before proceeding with transaction verification
-        * Fallback to BitPay for transacitons (on blockdozer failure)
-        * Fallback to cryptocompare for currency exchange (on coinmarketcap failure)
-
 TODO:
     - upload store logo (for printing)
         https://blueimp.github.io/jQuery-File-Upload/jquery-ui.html
