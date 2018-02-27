@@ -1,3 +1,5 @@
+Open-source and free (donations welcome however we don't take a cut of every transaction like moosh.io)
+
 Changelog:
 
     UI Improvements:

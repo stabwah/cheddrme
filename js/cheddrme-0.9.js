@@ -9,11 +9,12 @@
  *  maybe one day
  *  https://bitcoincash.blockexplorer.com/api/addr/1HMFfEwYv6M4qMsKa2d7eQbFBtF4e4dFWk -- doesnt support cashaddr
  *  https://cashexplorer.bitcoin.com/api/addr/1HMFfEwYv6M4qMsKa2d7eQbFBtF4e4dFWk -- doesn't support cashaddr
+ *  https://cashexplorer.bitcoin.com/api/addr/qze4dyv6znt5h22dxqsejvfn47tz2ermeg62y4cdg6
  * 
  *  https://bch-chain.api.btc.com/v3/address/1HMFfEwYv6M4qMsKa2d7eQbFBtF4e4dFWk -- doesnt support cashaddr, not insight api
  * 
- * following taken from https://github.com/simon-v/minipos/blob/master/bch.py
- * https://api.coinbase.com/v2/exchange-rates?currency=BCH',
+ *  following taken from https://github.com/simon-v/minipos/blob/master/bch.py
+ *  https://api.coinbase.com/v2/exchange-rates?currency=BCH',
  * 
  *****************************************************************************************************************/
 
