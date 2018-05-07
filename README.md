@@ -59,6 +59,3 @@ For vendors that already have existing Point of Sale systems the quickest way to
 # Donations
 
 This system is being developed in my spare time, donations are gratefully accepted.
-
-![qrcode](https://i.imgur.com/A1i7tvW.png)
-bitcoincash:qze4dyv6znt5h22dxqsejvfn47tz2ermeg62y4cdg6
